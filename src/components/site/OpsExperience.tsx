@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "@/components/site/theme";
 import EventDetail from "@/components/EventDetail";
-import IncidentTimeline from "@/components/IncidentTimeline";
+// import IncidentTimeline from "@/components/IncidentTimeline";
 import MapView from "@/components/MapView";
 import SlaAlertPanel, { type ZoneSlaAlert } from "@/components/SlaAlertPanel";
 import zoneMap from "@/data/zone_map_s001.json";
@@ -1748,6 +1748,11 @@ export default function OpsExperience() {
     [selectedEvent, timeline],
   );
 
+  const recentEvents = useMemo(
+    () => events.slice().reverse().slice(0, 10),
+    [events],
+  );
+
   const moveSelection = useCallback(
     (step: -1 | 1) => {
       if (visibleEvents.length === 0) {
@@ -2589,8 +2594,10 @@ export default function OpsExperience() {
         <span className={`feedDot ${connection}`} aria-hidden />
         <strong>{transportLabel(transport)}</strong>
         <span>{connectionNote}</span>
-        <span className="mono">마지막 갱신 {lastSyncLabel}</span>
-        <span className="opsFeedHint mono">단축키 [ / ] 이동 · Esc 해제</span>
+        <span>마지막 갱신 </span>
+        {/* <span className="mono">마지막 갱신 </span> */}
+
+
       </div>
 
       <section className="opsSignalGrid" aria-label="실시간 3대 상황">
@@ -2613,7 +2620,7 @@ export default function OpsExperience() {
               </strong>
             </p>
           </div>
-          <button
+          {/* <button
             type="button"
             className="opsSignalFocus"
             onClick={() => {
@@ -2623,7 +2630,7 @@ export default function OpsExperience() {
             }}
           >
             지도에서 혼잡도 보기
-          </button>
+          </button> */}
         </article>
 
         <article className="opsSignalCard">
@@ -2678,11 +2685,11 @@ export default function OpsExperience() {
           </div>
           <div className="opsSignalBody">
             <p>
-              심각도 <strong>{signalChecks.trash.severity}</strong> · 감지{" "}
+              심각도 <strong>{signalChecks.trash.severity}</strong>
               <strong>{signalChecks.trash.trashCount}</strong>건
             </p>
             <p>
-              이벤트 <strong>{signalChecks.trash.count}</strong>건 · 구역{" "}
+              감지 <strong>{signalChecks.trash.count}</strong>건 · 구역{" "}
               <strong>{signalChecks.trash.zoneId}</strong>
             </p>
             <p>
@@ -2709,6 +2716,43 @@ export default function OpsExperience() {
             }}
           >
             지도에서 쓰레기 보기
+          </button>
+        </article>
+
+        <article className="opsSignalCard">
+          <div className="opsSignalHead">
+            <strong>이벤트 기록 보기</strong>
+            <span className="opsSignalTone tone-idle">조회</span>
+          </div>
+          <div className="opsSignalBody">
+            <p>
+              전체 알림 <strong>{events.length}</strong>건
+            </p>
+            <p>
+              최근 기록{" "}
+              <strong>
+                {recentActions[0]
+                  ? getEventIdLabel(recentActions[0].event_id)
+                  : "-"}
+              </strong>
+            </p>
+            <p>
+              패널 상태 <strong>{showDiagnostics ? "표시 중" : "숨김"}</strong>
+            </p>
+          </div>
+          <button
+            type="button"
+            className="opsSignalFocus"
+            onClick={() => {
+              setShowDiagnostics((prev) => !prev);
+              setToast(
+                showDiagnostics
+                  ? "운영 진단 패널을 숨겼습니다."
+                  : "운영 진단 패널을 표시합니다.",
+              );
+            }}
+          >
+            {showDiagnostics ? "진단 패널 숨기기" : "진단 패널 표시하기"}
           </button>
         </article>
       </section>
@@ -2754,6 +2798,47 @@ export default function OpsExperience() {
                 {openCount} / {criticalCount}
               </strong>
             </article>
+          </div>
+
+          <div className="opsDiagLog">
+            <div className="opsDiagLogHead">
+              <strong>최근 이벤트 내역</strong>
+              <span className="mono">최근 10건</span>
+            </div>
+            {recentEvents.length === 0 ? (
+              <div className="opsDiagLogEmpty">
+                아직 기록된 이벤트가 없습니다.
+              </div>
+            ) : (
+              <div className="opsDiagLogList">
+                {recentEvents.map((event) => {
+                  const at = new Date(event.detected_at).toLocaleTimeString(
+                    undefined,
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                    },
+                  );
+                  const typeName = getEventTypeLabel(event.type);
+                  return (
+                    <div key={event.id} className="opsDiagLogRow">
+                      <span className="mono">{at}</span>
+                      <span
+                        className={`opsDiagLogBadge severityBadge sev-${event.severity}`}
+                        style={{ minWidth: "70px" }}
+                      >
+                        {typeName}
+                      </span>
+                      <span>{getZoneLabel(event.zone_id)}</span>
+                      <span className="mono" style={{ fontSize: "0.74rem", textAlign: "right" }}>
+                        S{event.severity}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="opsDiagLog">
@@ -2853,10 +2938,10 @@ export default function OpsExperience() {
               onDispatch={dispatchOperator}
               onResolve={markResolved}
             />
-            <IncidentTimeline
+            {/* <IncidentTimeline
               event={selectedEvent}
               entries={selectedTimeline}
-            />
+            /> */}
           </div>
         </article>
       </div>

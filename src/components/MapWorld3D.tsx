@@ -520,7 +520,7 @@ export default function MapWorld3D({
           gap: 2,
         }}
       >
-        입체 지도 보기
+        {/* 입체 지도 보기
         <span className="mono" style={{ opacity: 0.78, fontSize: 10, textTransform: "none", letterSpacing: 0 }}>
           marker source: normalized(x,y) unified
         </span>
@@ -535,7 +535,7 @@ export default function MapWorld3D({
               {modelState === "error" && modelError ? ` (${modelError})` : ""}
             </span>
           </>
-        ) : null}
+        ) : null} */}
       </div>
     </div>
   );
