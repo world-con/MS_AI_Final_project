@@ -1,0 +1,31 @@
+{
+  "store_id": "s001",
+  "note": [
+    "image_points are camera-frame pixel coordinates.",
+    "map_norm_points are floorplan normalized coordinates (0..1).",
+    "Use 4 corner correspondences per camera."
+  ],
+  "cameras": [
+    {
+      "camera_id": "camera-edge-01",
+      "enabled": true,
+      "frame": {
+        "width": 1280,
+        "height": 720
+      },
+      "image_points": [
+        [120, 105],
+        [1168, 94],
+        [1224, 706],
+        [82, 712]
+      ],
+      "map_norm_points": [
+        [0.06, 0.06],
+        [0.94, 0.07],
+        [0.95, 0.95],
+        [0.05, 0.94]
+      ]
+    }
+  ]
+}
+

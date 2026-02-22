@@ -1,0 +1,482 @@
+{
+  "store_id": "s001",
+  "map": {
+    "image_name": "floorplan_wireframe_20241027_clean.png",
+    "width": 800,
+    "height": 427,
+    "origin": {
+      "x": 0,
+      "y": 0
+    },
+    "axis": {
+      "x_positive": "right",
+      "y_positive": "down"
+    },
+    "world": {
+      "width_m": 9.0,
+      "depth_m": 4.8,
+      "offset_x_m": 0,
+      "offset_z_m": 0,
+      "x_positive": "right",
+      "z_positive": "down",
+      "note": "Calibrated for world(x,z) stream. Tune width/depth to match camera calibration."
+    },
+    "units": "px",
+    "note": "2024-10-27 wireframe floorplan fully recalibrated: room bounds + rack/island holes + world(x,z) mapping."
+  },
+  "zones": [
+    {
+      "zone_id": "zone-s001-back",
+      "zone_key": "back",
+      "name": "Back",
+      "polygon": [
+        [
+          46,
+          22
+        ],
+        [
+          752,
+          22
+        ],
+        [
+          752,
+          92
+        ],
+        [
+          46,
+          92
+        ]
+      ],
+      "centroid": [
+        399,
+        57
+      ],
+      "holes": [
+        [
+          [
+            218,
+            32
+          ],
+          [
+            582,
+            32
+          ],
+          [
+            582,
+            82
+          ],
+          [
+            218,
+            82
+          ]
+        ]
+      ]
+    },
+    {
+      "zone_id": "zone-s001-aisle-a",
+      "zone_key": "aisle-a",
+      "name": "Aisle A",
+      "polygon": [
+        [
+          46,
+          92
+        ],
+        [
+          218,
+          92
+        ],
+        [
+          218,
+          238
+        ],
+        [
+          46,
+          238
+        ]
+      ],
+      "centroid": [
+        132,
+        165
+      ],
+      "holes": [
+        [
+          [
+            58,
+            94
+          ],
+          [
+            124,
+            94
+          ],
+          [
+            124,
+            238
+          ],
+          [
+            58,
+            238
+          ]
+        ]
+      ]
+    },
+    {
+      "zone_id": "zone-s001-center",
+      "zone_key": "center",
+      "name": "Center",
+      "polygon": [
+        [
+          218,
+          92
+        ],
+        [
+          584,
+          92
+        ],
+        [
+          584,
+          238
+        ],
+        [
+          218,
+          238
+        ]
+      ],
+      "centroid": [
+        401,
+        165
+      ],
+      "holes": [
+        [
+          [
+            228,
+            114
+          ],
+          [
+            297,
+            114
+          ],
+          [
+            297,
+            238
+          ],
+          [
+            228,
+            238
+          ]
+        ],
+        [
+          [
+            377,
+            128
+          ],
+          [
+            431,
+            128
+          ],
+          [
+            431,
+            238
+          ],
+          [
+            377,
+            238
+          ]
+        ],
+        [
+          [
+            509,
+            114
+          ],
+          [
+            577,
+            114
+          ],
+          [
+            577,
+            238
+          ],
+          [
+            509,
+            238
+          ]
+        ]
+      ]
+    },
+    {
+      "zone_id": "zone-s001-aisle-b",
+      "zone_key": "aisle-b",
+      "name": "Aisle B",
+      "polygon": [
+        [
+          584,
+          92
+        ],
+        [
+          752,
+          92
+        ],
+        [
+          752,
+          238
+        ],
+        [
+          584,
+          238
+        ]
+      ],
+      "centroid": [
+        668,
+        165
+      ],
+      "holes": [
+        [
+          [
+            676,
+            94
+          ],
+          [
+            742,
+            94
+          ],
+          [
+            742,
+            238
+          ],
+          [
+            676,
+            238
+          ]
+        ]
+      ]
+    },
+    {
+      "zone_id": "zone-s001-storage",
+      "zone_key": "storage",
+      "name": "Storage",
+      "polygon": [
+        [
+          46,
+          238
+        ],
+        [
+          218,
+          238
+        ],
+        [
+          218,
+          392
+        ],
+        [
+          46,
+          392
+        ]
+      ],
+      "centroid": [
+        132,
+        315
+      ],
+      "holes": [
+        [
+          [
+            58,
+            238
+          ],
+          [
+            124,
+            238
+          ],
+          [
+            124,
+            366
+          ],
+          [
+            58,
+            366
+          ]
+        ]
+      ]
+    },
+    {
+      "zone_id": "zone-s001-cashier",
+      "zone_key": "cashier",
+      "name": "Cashier",
+      "polygon": [
+        [
+          218,
+          238
+        ],
+        [
+          400,
+          238
+        ],
+        [
+          400,
+          392
+        ],
+        [
+          218,
+          392
+        ]
+      ],
+      "centroid": [
+        309,
+        315
+      ],
+      "holes": [
+        [
+          [
+            228,
+            238
+          ],
+          [
+            297,
+            238
+          ],
+          [
+            297,
+            336
+          ],
+          [
+            228,
+            336
+          ]
+        ],
+        [
+          [
+            377,
+            238
+          ],
+          [
+            400,
+            238
+          ],
+          [
+            400,
+            320
+          ],
+          [
+            377,
+            320
+          ]
+        ]
+      ]
+    },
+    {
+      "zone_id": "zone-s001-entrance",
+      "zone_key": "entrance",
+      "name": "Entrance",
+      "polygon": [
+        [
+          400,
+          238
+        ],
+        [
+          584,
+          238
+        ],
+        [
+          584,
+          392
+        ],
+        [
+          400,
+          392
+        ]
+      ],
+      "centroid": [
+        492,
+        315
+      ],
+      "holes": [
+        [
+          [
+            400,
+            238
+          ],
+          [
+            431,
+            238
+          ],
+          [
+            431,
+            324
+          ],
+          [
+            400,
+            324
+          ]
+        ],
+        [
+          [
+            509,
+            238
+          ],
+          [
+            577,
+            238
+          ],
+          [
+            577,
+            338
+          ],
+          [
+            509,
+            338
+          ]
+        ]
+      ]
+    },
+    {
+      "zone_id": "zone-s001-exit",
+      "zone_key": "exit",
+      "name": "Exit",
+      "polygon": [
+        [
+          584,
+          238
+        ],
+        [
+          752,
+          238
+        ],
+        [
+          752,
+          392
+        ],
+        [
+          584,
+          392
+        ]
+      ],
+      "centroid": [
+        668,
+        315
+      ],
+      "holes": [
+        [
+          [
+            676,
+            238
+          ],
+          [
+            742,
+            238
+          ],
+          [
+            742,
+            366
+          ],
+          [
+            676,
+            366
+          ]
+        ]
+      ]
+    }
+  ],
+  "schema_notes": [
+    "Each zone has 'polygon' outer boundary. Optional 'holes' can exclude fixtures from walkable area.",
+    "If your UI doesn't support holes yet, you can ignore 'holes' safely.",
+    "If edge doesn't provide x,y, backend may default to zone centroid for pin placement."
+  ]
+}
