@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" fill="none">
+  <defs>
+    <radialGradient id="gWarm" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(288 244) rotate(12) scale(388 304)">
+      <stop stop-color="#D18B56" stop-opacity="0.72" />
+      <stop offset="1" stop-color="#D18B56" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="gCool" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(658 482) rotate(-20) scale(402 286)">
+      <stop stop-color="#5F8D87" stop-opacity="0.66" />
+      <stop offset="1" stop-color="#5F8D87" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="gLineA" x1="128" y1="212" x2="812" y2="482" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B86A37" stop-opacity="0.86" />
+      <stop offset="1" stop-color="#2F6F68" stop-opacity="0.78" />
+    </linearGradient>
+    <linearGradient id="gLineB" x1="140" y1="540" x2="800" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2F6F68" stop-opacity="0.52" />
+      <stop offset="1" stop-color="#B86A37" stop-opacity="0.48" />
+    </linearGradient>
+    <filter id="blurHeavy" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="46" />
+    </filter>
+  </defs>
+
+  <rect width="960" height="720" fill="#F1EBDD" />
+
+  <g filter="url(#blurHeavy)">
+    <circle cx="288" cy="244" r="256" fill="url(#gWarm)">
+      <animate attributeName="cx" values="288;334;288" dur="14s" repeatCount="indefinite" />
+      <animate attributeName="cy" values="244;212;244" dur="14s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="658" cy="482" r="272" fill="url(#gCool)">
+      <animate attributeName="cx" values="658;614;658" dur="16s" repeatCount="indefinite" />
+      <animate attributeName="cy" values="482;512;482" dur="16s" repeatCount="indefinite" />
+    </circle>
+  </g>
+
+  <g opacity="0.74">
+    <path d="M126 360C212 252 308 210 402 238C496 266 560 340 644 350C720 358 790 320 848 250" stroke="url(#gLineA)" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="3 14">
+      <animate attributeName="stroke-dashoffset" from="0" to="-420" dur="11s" repeatCount="indefinite" />
+    </path>
+    <path d="M132 512C226 452 328 418 430 420C536 422 626 470 726 454C786 444 834 410 868 374" stroke="url(#gLineB)" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="2 11">
+      <animate attributeName="stroke-dashoffset" from="0" to="-320" dur="9.5s" repeatCount="indefinite" />
+    </path>
+  </g>
+
+  <g stroke="rgba(24,24,21,0.2)" stroke-width="1">
+    <path d="M100 128H860" opacity="0.3" />
+    <path d="M100 594H860" opacity="0.26" />
+    <path d="M100 128V594" opacity="0.24" />
+    <path d="M860 128V594" opacity="0.22" />
+  </g>
+</svg>
