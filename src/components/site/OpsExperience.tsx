@@ -2266,23 +2266,23 @@ export default function OpsExperience() {
 
   return (
     <section className="opsShell reveal delay-1">
-      <div className="opsTop">
-        <div className="opsHeading">
-          {hasOpsKicker ? (
-            <p className="kicker">
-              {meta.icon} {meta.opsKicker}
-            </p>
-          ) : null}
-          {hasOpsTitle ? <h2>{meta.opsTitle}</h2> : null}
-          <p>{meta.opsLead}</p>
-        </div>
+      {/* <div className="opsTop"> */}
+      <div className="opsHeading">
+        {hasOpsKicker ? (
+          <p className="kicker">
+            {meta.icon} {meta.opsKicker}
+          </p>
+        ) : null}
+        {hasOpsTitle ? <h2>{meta.opsTitle}</h2> : null}
+        <p>{meta.opsLead}</p>
+      </div>
 
-        {/* <div className="opsMetricRow"> */}
-        {/* <article className="opsMetricCard"> */}
-        {/* <span>현재 알림</span> */}
-        {/* <strong>{liveEvents.length}</strong> */}
-        {/* <small>최근 {liveWindowMin}분 기준</small> */}
-        {/* </article>
+      {/* <div className="opsMetricRow"> */}
+      {/* <article className="opsMetricCard"> */}
+      {/* <span>현재 알림</span> */}
+      {/* <strong>{liveEvents.length}</strong> */}
+      {/* <small>최근 {liveWindowMin}분 기준</small> */}
+      {/* </article>
           <article className="opsMetricCard">
             <span>긴급 알림</span>
             <strong>{criticalCount}</strong>
@@ -2295,7 +2295,7 @@ export default function OpsExperience() {
           </article>
           <article className="opsMetricCard">
             <span>확인 지연</span> */}
-        {/* <strong>{overdueAckCount}</strong>
+      {/* <strong>{overdueAckCount}</strong>
             <small>{Math.round(ACK_SLA_MS / 60_000)}분 이상 미확인</small>
           </article>
           <article className="opsMetricCard">
@@ -2311,7 +2311,7 @@ export default function OpsExperience() {
         </div>
       </div> */}
 
-        {/* <div className="opsControls">
+      {/* <div className="opsControls">
         <button
           type="button"
           className={"opsToggle" + (playing ? " active" : "")}
@@ -2420,7 +2420,7 @@ export default function OpsExperience() {
           </select>
         </div> */}
 
-        {/* <div className="opsControlGroup">
+      {/* <div className="opsControlGroup">
           <span>표시</span>
           <button
             type="button"
@@ -2475,36 +2475,37 @@ export default function OpsExperience() {
           ))}
         </div> */}
 
-        {feedMode === "demo" && isAdmin && (
-          <div className="opsControlGroup">
-            <span>샘플</span>
-            <button type="button" className="opsPill" onClick={injectOne}>
-              알림 1개 추가
-            </button>
-            <button
-              type="button"
-              className="opsPill"
-              onClick={injectWorldSample}
-            >
-              위치 데이터 1개 추가
-            </button>
-            <button
-              type="button"
-              className="opsPill"
-              onClick={injectPhotoBasedLogs}
-            >
-              사진 기준 로그 반영
-            </button>
-            <button type="button" className="opsPill" onClick={seedHistory}>
-              지난 알림 채우기
-            </button>
-            <button type="button" className="opsPill" onClick={clearAll}>
-              전체 지우기
-            </button>
-          </div>
-        )}
+      {feedMode === "demo" && isAdmin && (
+        <div className="opsControlGroup">
+          <span>샘플</span>
+          <button type="button" className="opsPill" onClick={injectOne}>
+            알림 1개 추가
+          </button>
+          <button
+            type="button"
+            className="opsPill"
+            onClick={injectWorldSample}
+          >
+            위치 데이터 1개 추가
+          </button>
+          <button
+            type="button"
+            className="opsPill"
+            onClick={injectPhotoBasedLogs}
+          >
+            사진 기준 로그 반영
+          </button>
+          <button type="button" className="opsPill" onClick={seedHistory}>
+            지난 알림 채우기
+          </button>
+          <button type="button" className="opsPill" onClick={clearAll}>
+            전체 지우기
+          </button>
+        </div>
+      )}
 
-        <form
+      {/* 좌표 추가 부분 주석 처리 */}
+      {/* <form
           className="opsControlGroup opsCoordGroup"
           onSubmit={(event) => {
             event.preventDefault();
@@ -2582,7 +2583,7 @@ export default function OpsExperience() {
             매핑 삭제
           </button>
         </form>
-      </div>
+      </div> */}
 
       <div className="opsFeedStatus" role="status" aria-live="polite">
         <span className={`feedDot ${connection}`} aria-hidden />
@@ -2796,7 +2797,8 @@ export default function OpsExperience() {
       )}
 
       <div className="opsGrid">
-        <article className="opsCard opsMapCard">
+        {/* 회색 부분 주석 처리  */}
+        {/* <article className="opsCard opsMapCard">
           <MapView
             events={visibleEvents}
             selectedId={selectedId}
@@ -2804,7 +2806,7 @@ export default function OpsExperience() {
             liveWindowMs={liveWindowMs}
             debugOverlay={debugOverlay}
           />
-        </article>
+        </article> */}
 
         <article className="opsCard opsDetailCard">
           <header className="opsCardHead opsDetailHead">
