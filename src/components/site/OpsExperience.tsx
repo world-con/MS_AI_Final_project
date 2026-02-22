@@ -2712,14 +2712,14 @@ export default function OpsExperience() {
         </article>
       </section>
 
-      <SlaAlertPanel
+      {/* <SlaAlertPanel
         alerts={slaAlerts}
         onSelectZone={(zoneId) => {
           setZoneFilter(zoneId);
           setOpenOnly(true);
           setToast(`${getZoneLabel(zoneId)} 구역으로 필터했어요.`);
         }}
-      />
+      /> */}
 
       {showDiagnostics && (
         <div className="opsDiagnostics">
