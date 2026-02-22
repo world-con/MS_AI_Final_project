@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # TwinCity UI — Digital Twin Ops Console (WIP)
 
 TwinCity UI is a Next.js (React/TypeScript) operations console that overlays **Zones (polygons)** and **Events (points)** on a floorplan, so an operator can triage alerts faster by combining:
@@ -88,3 +89,7 @@ AdSense crawl helpers are provided in `public/ads.txt`, `public/robots.txt`, `pu
 - WS: WebSocket
 - SSE: Server-Sent Events
 - SLA: Service Level Agreement (time-to-ack / time-to-resolve targets)
+=======
+# MS_AI_Final_project
+MS AI 3차 프로젝트
+>>>>>>> ae7e31903d28dbcff4de58f5a9f16959f5ccfc97
