@@ -34,9 +34,9 @@ export default function SlaAlertPanel({
   //     </div>
 
   <div className="slaList">
-    {alerts.length === 0 && (
+    {/* {alerts.length === 0 && (
       <div className="slaEmpty">지금은 처리 지연 알림이 없습니다.</div>
-    )}
+    )} */}
     {alerts.map((alert) => (
       <div
         key={alert.zoneId}
