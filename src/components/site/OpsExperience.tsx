@@ -2796,9 +2796,9 @@ export default function OpsExperience() {
         </div>
       )}
 
-      <div className="opsGrid">
+      <div className={`opsGrid ${selectedId ? "hasSelection" : ""}`}>
         {/* 회색 부분 주석 처리  */}
-        {/* <article className="opsCard opsMapCard">
+        <article className="opsCard opsMapCard">
           <MapView
             events={visibleEvents}
             selectedId={selectedId}
@@ -2806,7 +2806,7 @@ export default function OpsExperience() {
             liveWindowMs={liveWindowMs}
             debugOverlay={debugOverlay}
           />
-        </article> */}
+        </article>
 
         <article className="opsCard opsDetailCard">
           <header className="opsCardHead opsDetailHead">

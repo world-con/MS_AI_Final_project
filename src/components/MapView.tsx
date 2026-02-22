@@ -258,7 +258,7 @@ export default function MapView({
         </div>
       </div>
 
-      <div
+      {/* <div
         style={{
           width: "100%",
           borderRadius: "0 0 14px 14px",
@@ -271,17 +271,17 @@ export default function MapView({
           display: "grid",
           gap: 6,
         }}
-      >
-        {selectedEvent ? (
-          <>
-            {/* <p>
+      > */}
+      {selectedEvent ? (
+        <>
+          {/* <p>
               <strong>{getEventTypeLabel(selectedEvent.type)}</strong> · {getTrackLabel(selectedEvent.track_id, selectedEvent.id)} · 구역 {getZoneLabel(selectedEvent.zone_id)}
             </p> */}
-          </>
-        ) : (
-          <p style={{ opacity: 0.74 }}>지도의 마커를 누르면 선택 정보가 표시됩니다.</p>
-        )}
-      </div>
+        </>
+      ) : (
+        <p style={{ opacity: 0.74 }}>지도의 마커를 누르면 선택 정보가 표시됩니다.</p>
+      )}
     </div>
+    // </div>
   );
 }

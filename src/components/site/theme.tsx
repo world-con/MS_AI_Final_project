@@ -40,7 +40,7 @@ const THEME_META: Record<Theme, ThemeMeta> = {
     homeVoice: "한눈에 상황을 파악하고, 바로 대응할 수 있게 만든 화면입니다.",
     homeQuote: "쉽게 보이면, 빠르게 움직일 수 있습니다.",
     opsKicker: "",
-    opsTitle: "복잡한 정보도 쉽게 읽히는 실시간 운영 화면",
+    opsTitle: "Vision Pro",
     opsLead: "지도, 알림, 처리 기록을 한 흐름으로 보여줘서 누구나 빠르게 판단할 수 있습니다.",
     modeLiveLabel: "실시간",
     modeDemoLabel: "연습",
