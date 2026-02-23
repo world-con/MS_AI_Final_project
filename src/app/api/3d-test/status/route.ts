@@ -5,8 +5,8 @@ export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 const FLOORPLAN_CANDIDATES = [
-  "/3d/floorplan_wireframe_20241027_clean.png",
-  "/floorplan_wireframe_20241027_clean.png",
+  "/3d/floorplan_wireframe_20241027.png",
+  "/floorplan_wireframe_20241027.png",
   "/3d/floorplan_wireframe_20241027.png",
   "/floorplan_wireframe_20241027.png",
   "/floorplan_s001.png",
@@ -46,7 +46,7 @@ export async function GET(request: Request) {
   const world = map?.world ?? {};
   const floorplanAsset = await probeAsset(request, FLOORPLAN_CANDIDATES);
   const modelAsset = await probeAsset(request, MODEL_CANDIDATES);
-  const floorplanName = floorplanAsset.path.split("/").filter(Boolean).at(-1) ?? "floorplan_wireframe_20241027_clean.png";
+  const floorplanName = floorplanAsset.path.split("/").filter(Boolean).at(-1) ?? "floorplan_wireframe_20241027.png";
   const modelName = modelAsset.path.split("/").filter(Boolean).at(-1) ?? "store_13x13.glb";
 
   return apiJson(

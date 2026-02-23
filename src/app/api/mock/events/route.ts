@@ -1,10 +1,11 @@
 import { apiError, apiJson, readBoundedIntParam, resolveRequestId } from "@/lib/apiResponse";
-import { generateDummyEvents } from "@/lib/dummy";
+// import { generateDummyEvents } from "@/lib/dummy";
 import type { EventItem } from "@/lib/types";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
+/*
 function toSchemaA(event: EventItem) {
   return {
     eventId: event.id,
@@ -101,7 +102,9 @@ function toSchemaEdgeObject(event: EventItem, idx: number) {
     },
   };
 }
+*/
 
+/* --- 원본 GET 함수 (더미 데이터 비활성화로 주석 처리) ---
 export function GET(request: Request) {
   const url = new URL(request.url);
   const requestId = resolveRequestId(request);
@@ -177,6 +180,22 @@ export function GET(request: Request) {
         shape: "a",
       },
       records: events.map(toSchemaA),
+    },
+    { requestId }
+  );
+}
+--- 원본 GET 함수 끝 --- */
+
+export function GET(request: Request) {
+  const requestId = resolveRequestId(request);
+  return apiJson(
+    {
+      meta: {
+        request_id: requestId,
+        generated_at: new Date().toISOString(),
+        note: "Dummy data has been disabled."
+      },
+      records: [],
     },
     { requestId }
   );

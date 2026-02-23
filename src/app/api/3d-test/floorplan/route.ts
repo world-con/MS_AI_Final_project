@@ -4,8 +4,8 @@ export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 const CANDIDATE_FLOORPLAN_PATHS = [
-  "/3d/floorplan_wireframe_20241027_clean.png",
-  "/floorplan_wireframe_20241027_clean.png",
+  "/3d/floorplan_wireframe_20241027.png",
+  "/floorplan_wireframe_20241027.png",
   "/3d/floorplan_wireframe_20241027.png",
   "/floorplan_wireframe_20241027.png",
   "/floorplan_s001.png",

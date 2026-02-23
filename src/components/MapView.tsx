@@ -18,7 +18,7 @@ type Props = {
   mapAspectRatioOverride?: number;
 };
 
-const FALLBACK_FLOOR_IMAGE = "/floorplan_wireframe_20241027_clean.png";
+const FALLBACK_FLOOR_IMAGE = "/floorplan_wireframe_20241027.png";
 const EXTERNAL_FLOORPLAN_IMAGE = "/api/3d-test/floorplan";
 const EXTERNAL_3D_TEST_MODEL = "/api/3d-test/model";
 
@@ -148,13 +148,39 @@ export default function MapView({
                 const live = isLive(event.detected_at, liveWindowMs);
                 const isAlert = event.raw_status?.toLowerCase() === "fall_down" || event.type === "fall";
                 const isPhotoLog = event.id.startsWith("photo-log-");
-                const radius = isAlert ? 11 : event.severity === 2 ? 8 : 7;
+                const isEdgeCleaning = event.edge_category === "cleaning";
+                const isEdgeSafety = event.edge_category === "safety";
+                const isEdgeMarker = isEdgeCleaning || isEdgeSafety;
+                const radius = isEdgeSafety ? 11 : isEdgeCleaning ? 9 : isAlert ? 11 : event.severity === 2 ? 8 : 7;
                 const x = clamp01(event.x);
                 const y = clamp01(event.y);
                 const cx = x * vbW;
                 const cy = y * vbH;
                 const selected = event.id === selectedId;
                 const labelPos = isPhotoLog ? resolvePhotoLabelPosition(event.id, cx, cy, vbW, vbH) : null;
+
+                // 엣지 마커 색상: 쓰레기=노란색, 이상행동=빨간색
+                const markerFill = isEdgeSafety
+                  ? "rgba(255,74,93,0.96)"
+                  : isEdgeCleaning
+                    ? "rgba(255,201,87,0.93)"
+                    : isAlert
+                      ? "rgba(255,74,93,0.96)"
+                      : event.severity === 2
+                        ? "rgba(255,201,87,0.93)"
+                        : live
+                          ? "rgba(87,166,255,0.92)"
+                          : "rgba(121,150,196,0.84)";
+
+                const markerGlow = isEdgeSafety
+                  ? "rgba(255,74,93,0.24)"
+                  : isEdgeCleaning
+                    ? "rgba(255,201,87,0.22)"
+                    : isAlert
+                      ? "rgba(255,74,93,0.24)"
+                      : live
+                        ? "rgba(89,176,255,0.18)"
+                        : "rgba(109,130,160,0.18)";
 
                 return (
                   <g
@@ -170,27 +196,13 @@ export default function MapView({
                       cx={cx}
                       cy={cy}
                       r={selected ? radius + 11 : radius + 7}
-                      fill={
-                        isAlert
-                          ? "rgba(255,74,93,0.24)"
-                          : live
-                            ? "rgba(89,176,255,0.18)"
-                            : "rgba(109,130,160,0.18)"
-                      }
+                      fill={markerGlow}
                     />
                     <circle
                       cx={cx}
                       cy={cy}
                       r={radius}
-                      fill={
-                        isAlert
-                          ? "rgba(255,74,93,0.96)"
-                          : event.severity === 2
-                            ? "rgba(255,201,87,0.93)"
-                            : live
-                              ? "rgba(87,166,255,0.92)"
-                              : "rgba(121,150,196,0.84)"
-                      }
+                      fill={markerFill}
                       stroke={selected ? "white" : "rgba(0,0,0,0.26)"}
                       strokeWidth={selected ? 3 : 1}
                     />
@@ -272,15 +284,15 @@ export default function MapView({
           gap: 6,
         }}
       > */}
-      {selectedEvent ? (
-        <>
-          {/* <p>
+      {/* {selectedEvent ? ( */}
+      <>
+        {/* <p>
               <strong>{getEventTypeLabel(selectedEvent.type)}</strong> · {getTrackLabel(selectedEvent.track_id, selectedEvent.id)} · 구역 {getZoneLabel(selectedEvent.zone_id)}
             </p> */}
-        </>
-      ) : (
-        <p style={{ opacity: 0.74 }}>지도의 마커를 누르면 선택 정보가 표시됩니다.</p>
-      )}
+      </>
+      {/* ) : ( */}
+      {/* <p style={{ opacity: 0.74 }}>지도의 마커를 누르면 선택 정보가 표시됩니다.</p> */}
+      {/* )} */}
     </div>
     // </div>
   );

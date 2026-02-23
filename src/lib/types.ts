@@ -62,6 +62,7 @@ export type EventItem = {
   world_x_m?: number;
   world_z_m?: number;
   note?: string;
+  edge_category?: "cleaning" | "safety";  // SignalR 엣지 이벤트 카테고리
 };
 
 export type IncidentTimelineEntry = {

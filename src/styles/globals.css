@@ -2464,8 +2464,8 @@ body.is-gated {
   padding: 0.76rem;
   display: grid;
   gap: 0.62rem;
-  min-height: 60;
-  height: 75%;
+  min-height: 0;
+  height: 90%;
   box-shadow: 0 16px 30px rgba(28, 24, 17, 0.09);
   backdrop-filter: blur(3px);
   transition: border-color 160ms ease, box-shadow 180ms ease;

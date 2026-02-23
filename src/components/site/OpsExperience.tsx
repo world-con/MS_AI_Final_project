@@ -12,8 +12,8 @@ import { PHOTO_REFERENCE_POINTS as photoReferencePointsRaw } from "@/data/photo_
 import {
   DEFAULT_LIVE_WINDOW_MS,
   EVENT_TYPES,
-  generateDummyEvent,
-  generateDummyEvents,
+  // generateDummyEvent,
+  // generateDummyEvents,
 } from "@/lib/dummy";
 import { worldToMapNorm } from "@/lib/coordinateTransform";
 import { adaptRawEvent, normalizeEventFeed } from "@/lib/eventAdapter";
@@ -339,6 +339,7 @@ function mapPhotoWorldToNorm(worldX: number, worldZ: number) {
 }
 
 function buildPhotoSeedEvents(now: number) {
+  /* --- 원본 buildPhotoSeedEvents 로직 (더미 데이터 비활성화로 주석 처리) ---
   const events: EventItem[] = [];
   const enabledTrackIds = new Set<number>(PHOTO_SEED_LOG_TRACK_IDS);
 
@@ -412,7 +413,6 @@ function buildPhotoSeedEvents(now: number) {
       fixed3dPayload.x_norm = fixed3dNorm.x;
       fixed3dPayload.y_norm = fixed3dNorm.y;
     } else {
-      // Fallback when homography cannot be computed.
       fixed3dPayload.world = {
         x: fixed.x,
         z: fixed.z,
@@ -437,6 +437,85 @@ function buildPhotoSeedEvents(now: number) {
   });
 
   return events;
+  --- 원본 buildPhotoSeedEvents 로직 끝 --- */
+
+  return [] as EventItem[];
+}
+
+/**
+ * SignalR에서 들어오는 cleaningEvent / safetyEvent 페이로드에서
+ * location.world.x / z 좌표를 추출하여 맵에 표시할 EventItem[]로 변환합니다.
+ */
+function parseEdgeWorldMarkers(
+  payload: unknown,
+  category: "cleaning" | "safety",
+): EventItem[] {
+  const markers: EventItem[] = [];
+  const now = Date.now();
+
+  // payload가 배열이면 각 항목 처리, 객체이면 objects 배열 또는 단일 항목 처리
+  const items: unknown[] = [];
+  if (Array.isArray(payload)) {
+    items.push(...payload);
+  } else if (payload && typeof payload === "object") {
+    const record = payload as Record<string, unknown>;
+    // data.objects 배열 형태
+    const objects = record.objects ?? (record.data as Record<string, unknown> | undefined)?.objects;
+    if (Array.isArray(objects)) {
+      items.push(...objects);
+    } else {
+      items.push(payload);
+    }
+  }
+
+  items.forEach((item, idx) => {
+    if (!item || typeof item !== "object") return;
+    const obj = item as Record<string, unknown>;
+
+    // location.world.x / z 추출
+    const location = obj.location as Record<string, unknown> | undefined;
+    const world = (location?.world ?? obj.world) as Record<string, unknown> | undefined;
+    if (!world) return;
+
+    const worldX = Number(world.x);
+    const worldZ = Number(world.z);
+    if (!Number.isFinite(worldX) || !Number.isFinite(worldZ)) return;
+
+    // 기존 하드코딩 좌표와 동일한 방식으로 world → map norm 변환
+    const norm = worldToMapNorm(
+      worldX - WORLD_OFFSET_X_M,
+      worldZ - WORLD_OFFSET_Z_M,
+    );
+
+    const trackId = String(obj.track_id ?? idx);
+    const markerId = `edge-${category}-${trackId}-${now}`;
+
+    markers.push({
+      id: markerId,
+      store_id: "s001",
+      detected_at: now,
+      ingested_at: now,
+      latency_ms: 0,
+      type: category === "safety" ? "fall" : "unknown",
+      severity: category === "safety" ? 3 : 2,
+      confidence: Number(obj.confidence ?? 0.9),
+      zone_id: String((location?.zone_id ?? obj.zone_id) ?? "Store"),
+      camera_id: String(obj.camera_id ?? obj.deviceId ?? "camera-edge-01"),
+      track_id: trackId,
+      source: "camera",
+      incident_status: "new",
+      x: norm.x,
+      y: norm.y,
+      world_x_m: worldX,
+      world_z_m: worldZ,
+      edge_category: category,
+      note: category === "cleaning"
+        ? `쓰레기 감지 · w(${worldX.toFixed(2)}, ${worldZ.toFixed(2)})`
+        : `이상행동 감지 · w(${worldX.toFixed(2)}, ${worldZ.toFixed(2)})`,
+    });
+  });
+
+  return markers;
 }
 
 function composeVlmNote(record: Record<string, unknown>) {
@@ -1165,6 +1244,12 @@ export default function OpsExperience() {
     useState<ManualCoordinateMode>("world");
   const [manualCoordX, setManualCoordX] = useState("");
   const [manualCoordY, setManualCoordY] = useState("");
+
+  // --- 엣지 맵 마커 토글 state ---
+  const [showTrashOnMap, setShowTrashOnMap] = useState(false);
+  const [showSafetyOnMap, setShowSafetyOnMap] = useState(false);
+  const [edgeCleaningMarkers, setEdgeCleaningMarkers] = useState<EventItem[]>([]);
+  const [edgeSafetyMarkers, setEdgeSafetyMarkers] = useState<EventItem[]>([]);
   const [manualCameraId, setManualCameraId] = useState(
     DEFAULT_MANUAL_CAMERA_ID,
   );
@@ -1197,15 +1282,16 @@ export default function OpsExperience() {
     const fallback =
       seededFromPhoto.length > 0
         ? seededFromPhoto
-        : generateDummyEvents(72, {
+        : []; /* generateDummyEvents(72, {
           liveWindowMs: DEFAULT_LIVE_WINDOW_MS,
           historyRatio: 0.32,
-        });
+        }); */
 
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (!raw) {
-        setEvents(fallback);
+        // setEvents(fallback); // --- 원본: fallback 데이터로 초기화 ---
+        setEvents([]);
         setHydrated(true);
         return;
       }
@@ -1258,15 +1344,18 @@ export default function OpsExperience() {
         setRole(parsed.role);
       }
 
-      const restoredEvents = normalizeEventFeed(parsed.events, {
-        maxEvents: restoredMaxEvents,
-        fallbackStoreId: "s001",
-        defaultSource: "demo",
-      });
-      setEvents(restoredEvents.length > 0 ? restoredEvents : fallback);
+      // --- 더미 데이터 비활성화: localStorage에서 이전 이벤트를 복원하지 않음 ---
+      // const restoredEvents = normalizeEventFeed(parsed.events, {
+      //   maxEvents: restoredMaxEvents,
+      //   fallbackStoreId: "s001",
+      //   defaultSource: "demo",
+      // });
+      // setEvents(restoredEvents.length > 0 ? restoredEvents : fallback);
+      setEvents([]);
       setTimeline(parseTimeline(parsed.timeline));
     } catch {
-      setEvents(fallback);
+      // setEvents(fallback); // --- 원본: fallback 데이터로 초기화 ---
+      setEvents([]);
     } finally {
       setHydrated(true);
     }
@@ -1351,6 +1440,7 @@ export default function OpsExperience() {
 
     const interval = Math.max(220, Math.floor(980 / speed));
     const timer = window.setInterval(() => {
+      /*
       const burst =
         1 +
         (Math.random() < 0.45 ? 1 : 0) +
@@ -1361,6 +1451,7 @@ export default function OpsExperience() {
         generateDummyEvent({ liveWindowMs, historyRatio: 0.08 }),
       );
       setEvents((prev) => mergeEvents(prev, incoming, maxEvents));
+      */
     }, interval);
 
     return () => window.clearInterval(timer);
@@ -1589,7 +1680,20 @@ export default function OpsExperience() {
             console.log("args:", args.map(safePreview));
             console.groupEnd();
 
-            // 기존 로직 유지 (args[0]이 실제 payload인 경우가 많음)
+            // --- 엣지 데이터(쓰레기/이상행동) 좌표 파싱 ---
+            if (target === "cleaningEvent" || target === "safetyEvent") {
+              const rawPayload = args.length === 1 ? args[0] : args;
+              const edgeMarkers = parseEdgeWorldMarkers(rawPayload, target === "cleaningEvent" ? "cleaning" : "safety");
+              if (edgeMarkers.length > 0) {
+                if (target === "cleaningEvent") {
+                  setEdgeCleaningMarkers(edgeMarkers);
+                } else {
+                  setEdgeSafetyMarkers(edgeMarkers);
+                }
+              }
+            }
+
+            // 기존 로직 유지: signalChecks 패널 업데이트용 (맵 자동 표시는 mapDisplayEvents에서 제어)
             pushIncoming(args.length === 1 ? args[0] : args);
           });
         });
@@ -1721,6 +1825,15 @@ export default function OpsExperience() {
     () => filteredEvents.slice(0, MAX_VISIBLE),
     [filteredEvents],
   );
+
+  // --- 맵에는 토글된 엣지 마커만 표시 (signalChecks 패널은 pushIncoming으로 정상 동작) ---
+  const mapDisplayEvents = useMemo(() => {
+    // const base = [...visibleEvents]; // --- 원본: 모든 이벤트를 맵에 자동 표시 ---
+    const base: EventItem[] = [];
+    if (showTrashOnMap) base.push(...edgeCleaningMarkers);
+    if (showSafetyOnMap) base.push(...edgeSafetyMarkers);
+    return base;
+  }, [showTrashOnMap, showSafetyOnMap, edgeCleaningMarkers, edgeSafetyMarkers]);
 
   useEffect(() => {
     if (visibleEvents.length === 0) {
@@ -1940,8 +2053,8 @@ export default function OpsExperience() {
       setToast("관리 권한에서만 샘플을 주입할 수 있어요.");
       return;
     }
-    const incoming = generateDummyEvent({ liveWindowMs, historyRatio: 0.15 });
-    setEvents((prev) => mergeEvents(prev, [incoming], maxEvents));
+    // const incoming = generateDummyEvent({ liveWindowMs, historyRatio: 0.15 });
+    // setEvents((prev) => mergeEvents(prev, [incoming], maxEvents));
     setToast("샘플 알림을 1건 추가했습니다.");
   };
 
@@ -2123,12 +2236,12 @@ export default function OpsExperience() {
       setToast("관리 권한에서만 히스토리 시드를 만들 수 있어요.");
       return;
     }
-    const incoming = generateDummyEvents(40, {
-      liveWindowMs,
-      historyRatio: 1,
-      forceHistory: true,
-    });
-    setEvents((prev) => mergeEvents(prev, incoming, maxEvents));
+    // const incoming = generateDummyEvents(40, {
+    //   liveWindowMs,
+    //   historyRatio: 1,
+    //   forceHistory: true,
+    // });
+    // setEvents((prev) => mergeEvents(prev, incoming, maxEvents));
     setToast("지난 알림을 채웠습니다.");
   };
 
@@ -2658,21 +2771,13 @@ export default function OpsExperience() {
           </div>
           <button
             type="button"
-            className="opsSignalFocus"
+            className={"opsSignalFocus" + (showSafetyOnMap ? " active" : "")}
             onClick={() => {
-              setTypeFilter("all");
-              if (
-                signalChecks.safety.zoneId &&
-                signalChecks.safety.zoneId !== "-"
-              ) {
-                setZoneFilter(signalChecks.safety.zoneId);
-              }
-              setMinSeverity(2);
-              setOpenOnly(false);
-              setToast("이상행동 신호 구역으로 필터를 맞췄습니다.");
+              setShowSafetyOnMap((prev) => !prev);
+              setToast(showSafetyOnMap ? "이상행동 마커를 숨겼습니다." : "이상행동 마커를 지도에 표시합니다.");
             }}
           >
-            지도에서 이상행동 보기
+            {showSafetyOnMap ? "이상행동 숨기기" : "지도에서 이상행동 보기"}
           </button>
         </article>
 
@@ -2686,7 +2791,7 @@ export default function OpsExperience() {
           <div className="opsSignalBody">
             <p>
               심각도 <strong>{signalChecks.trash.severity}</strong>
-              <strong>{signalChecks.trash.trashCount}</strong>건
+              {/* <strong>{signalChecks.trash.trashCount}</strong>건 */}
             </p>
             <p>
               감지 <strong>{signalChecks.trash.count}</strong>건 · 구역{" "}
@@ -2701,21 +2806,13 @@ export default function OpsExperience() {
           </div>
           <button
             type="button"
-            className="opsSignalFocus"
+            className={"opsSignalFocus" + (showTrashOnMap ? " active" : "")}
             onClick={() => {
-              setTypeFilter("unknown");
-              if (
-                signalChecks.trash.zoneId &&
-                signalChecks.trash.zoneId !== "-"
-              ) {
-                setZoneFilter(signalChecks.trash.zoneId);
-              }
-              setMinSeverity(2);
-              setOpenOnly(false);
-              setToast("쓰레기 감지 중심으로 지도를 보여줍니다.");
+              setShowTrashOnMap((prev) => !prev);
+              setToast(showTrashOnMap ? "쓰레기 마커를 숨겼습니다." : "쓰레기 마커를 지도에 표시합니다.");
             }}
           >
-            지도에서 쓰레기 보기
+            {showTrashOnMap ? "쓰레기 숨기기" : "지도에서 쓰레기 보기"}
           </button>
         </article>
 
@@ -2885,11 +2982,12 @@ export default function OpsExperience() {
         {/* 회색 부분 주석 처리  */}
         <article className="opsCard opsMapCard">
           <MapView
-            events={visibleEvents}
+            events={mapDisplayEvents}
             selectedId={selectedId}
             onSelect={setSelectedId}
             liveWindowMs={liveWindowMs}
             debugOverlay={debugOverlay}
+            mapAspectRatioOverride={16 / 9} // 이 줄을 추가
           />
         </article>
 

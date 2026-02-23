@@ -33,7 +33,7 @@ function randomInt(min: number, max: number) {
 export const DEFAULT_LIVE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 export const DEFAULT_HISTORY_LOOKBACK_MS = 6 * 60 * 60 * 1000; // 6 hours
 
-export function generateDummyEvent(options: DummyEventOptions = {}): EventItem {
+/* export function generateDummyEvent(options: DummyEventOptions = {}): EventItem {
   const z = pick(zm.zones);
   const p = samplePointInZoneNorm(z, zm);
 
@@ -88,4 +88,4 @@ export function generateDummyEvents(count: number, options: DummyBatchOptions = 
   return newestFirst === false
     ? events.sort((a, b) => a.detected_at - b.detected_at)
     : events.sort((a, b) => b.detected_at - a.detected_at);
-}
+} */
