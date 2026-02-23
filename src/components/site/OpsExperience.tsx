@@ -1276,7 +1276,7 @@ export default function OpsExperience() {
       : "연습 데이터로 화면을 보여주고 있습니다.",
   );
   const [lastSyncAt, setLastSyncAt] = useState<number | undefined>(undefined);
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   const liveWindowMs = liveWindowMin * 60 * 1000;
@@ -1364,11 +1364,12 @@ export default function OpsExperience() {
       setEvents([]);
     } finally {
       setHydrated(true);
+      setNow(Date.now());
     }
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || now === null) return;
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, [hydrated]);
@@ -1825,7 +1826,11 @@ export default function OpsExperience() {
 
   const liveEvents = useMemo(
     () =>
-      filteredEvents.filter((event) => now - event.detected_at <= liveWindowMs),
+      now === null
+        ? []
+        : filteredEvents.filter(
+          (event) => now - event.detected_at <= liveWindowMs,
+        ),
     [filteredEvents, liveWindowMs, now],
   );
 
@@ -2299,12 +2304,14 @@ export default function OpsExperience() {
   const openCount = openEvents.length;
   const overdueAckCount = openEvents.filter(
     (event) =>
-      event.incident_status === "new" && now - event.detected_at > ACK_SLA_MS,
+      event.incident_status === "new" &&
+      now !== null &&
+      now - event.detected_at > ACK_SLA_MS,
   ).length;
   const overdueResolveCount = openEvents.filter((event) => {
     if (event.incident_status !== "ack") return false;
     const ackAt = ackAtByEvent.get(event.id) ?? event.detected_at;
-    return now - ackAt > RESOLVE_SLA_MS;
+    return now !== null && now - ackAt > RESOLVE_SLA_MS;
   }).length;
   const slaAlerts = useMemo<ZoneSlaAlert[]>(() => {
     const ackThresholdSec = Math.round(ACK_SLA_MS / 1000);
@@ -2332,14 +2339,16 @@ export default function OpsExperience() {
         | 3;
       next.worstAgeSec = Math.max(
         next.worstAgeSec,
-        Math.max(0, Math.round((now - event.detected_at) / 1000)),
+        now === null ? 0 : Math.max(0, Math.round((now - event.detected_at) / 1000)),
       );
 
       if (event.incident_status === "new") {
-        if (now - event.detected_at > ACK_SLA_MS) next.overdueAckCount += 1;
+        if (now !== null && now - event.detected_at > ACK_SLA_MS)
+          next.overdueAckCount += 1;
       } else if (event.incident_status === "ack") {
         const ackAt = ackAtByEvent.get(event.id) ?? event.detected_at;
-        if (now - ackAt > RESOLVE_SLA_MS) next.overdueResolveCount += 1;
+        if (now !== null && now - ackAt > RESOLVE_SLA_MS)
+          next.overdueResolveCount += 1;
       }
 
       byZone.set(zoneId, next);
@@ -2413,7 +2422,16 @@ export default function OpsExperience() {
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
             </button>
-            <div style={{ flex: 1, padding: "1.5rem 2rem", overflow: "hidden", position: "relative" }}>
+            <div style={{
+              flex: 1,
+              padding: "1.5rem 2rem",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: 0 // Prevent flex child from overflowing
+            }}>
               <MapView
                 events={mapDisplayEvents}
                 selectedId={selectedId}
@@ -2438,8 +2456,17 @@ export default function OpsExperience() {
           <p>{meta.opsLead}</p>
         </div>
         <div className="opsClock">
-          <span className="opsClockTime mono"><small>현재 시간</small>{new Date(now).toLocaleTimeString("ko-KR", { hour12: false, hour: "2-digit", minute: "2-digit" })}</span>
-          <span className="opsClockDate">{new Date(now).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "long" })}</span>
+          {hydrated && now ? (
+            <>
+              <span className="opsClockTime mono"><small>현재 시간</small>{new Date(now).toLocaleTimeString("ko-KR", { hour12: false, hour: "2-digit", minute: "2-digit" })}</span>
+              <span className="opsClockDate">{new Date(now).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "long" })}</span>
+            </>
+          ) : (
+            <>
+              <span className="opsClockTime mono"><small>현재 시간</small>--:--</span>
+              <span className="opsClockDate">----년 --월 --일 ---요일</span>
+            </>
+          )}
         </div>
       </div>
 

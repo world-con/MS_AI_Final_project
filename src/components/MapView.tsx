@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import zoneMap from "@/data/zone_map_s001.json";
 import MapWorld3D from "@/components/MapWorld3D";
 import { MODEL_REF_DEPTH_M, MODEL_REF_WIDTH_M } from "@/lib/coordinateTransform";
@@ -84,17 +84,25 @@ export default function MapView({
     : zm.map.width / zm.map.height;
   const vbH = Math.round(vbW / mapAspect);
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const selectedEvent = events.find((event) => event.id === selectedId);
 
+  if (!mounted) {
+    return <div style={{ width: "100%", height: "100%", background: "rgba(0,0,0,0.05)" }} />;
+  }
+
   return (
-    <div style={{ display: "grid", gap: 0, width: "100%", height: "100%", overflow: "hidden" }}>
+    <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
       <div
         style={{
           position: "relative",
           width: "100%",
           maxWidth: "100%",
           maxHeight: "100%",
-          margin: "auto",
           aspectRatio: `${mapAspect}`,
           borderRadius: "14px",
           overflow: "hidden",
