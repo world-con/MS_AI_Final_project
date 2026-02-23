@@ -16,6 +16,7 @@ type Props = {
   liveWindowMs?: number;
   debugOverlay?: boolean;
   mapAspectRatioOverride?: number;
+  onExpand?: () => void;
 };
 
 const FALLBACK_FLOOR_IMAGE = "/floorplan_wireframe_20241027.png";
@@ -58,6 +59,7 @@ export default function MapView({
   liveWindowMs = 60 * 60 * 1000,
   debugOverlay = false,
   mapAspectRatioOverride,
+  onExpand,
 }: Props) {
   const zm = zoneMap as ZoneMap;
 
@@ -85,13 +87,14 @@ export default function MapView({
   const selectedEvent = events.find((event) => event.id === selectedId);
 
   return (
-    <div style={{ display: "grid", gap: 0 }}>
+    <div style={{ display: "grid", gap: 0, width: "100%", height: "100%", overflow: "hidden" }}>
       <div
         style={{
           position: "relative",
           width: "100%",
-          maxWidth: "95%",
-          margin: "0 auto",
+          maxWidth: "100%",
+          maxHeight: "100%",
+          margin: "auto",
           aspectRatio: `${mapAspect}`,
           borderRadius: "14px",
           overflow: "hidden",
@@ -114,8 +117,17 @@ export default function MapView({
 
             <svg
               viewBox={`0 0 ${vbW} ${vbH}`}
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-              onClick={() => onSelect(undefined)}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                cursor: onExpand ? "zoom-in" : "default"
+              }}
+              onClick={() => {
+                onSelect(undefined);
+                onExpand?.();
+              }}
             >
               {debugOverlay &&
                 zm.zones.map((zone) => {

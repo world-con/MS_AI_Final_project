@@ -1264,6 +1264,7 @@ export default function OpsExperience() {
   const [manualFrameHeight, setManualFrameHeight] = useState(
     String(DEFAULT_MANUAL_FRAME_HEIGHT),
   );
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
 
   const [connection, setConnection] = useState<FeedConnection>("idle");
   const [transport, setTransport] = useState<FeedTransport>(
@@ -2400,6 +2401,31 @@ export default function OpsExperience() {
 
   return (
     <section className="opsShell reveal delay-1">
+      {isMapExpanded && (
+        <div className="opsLightbox" onClick={() => setIsMapExpanded(false)}>
+          <div className="opsLightboxContent" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="opsLightboxClose"
+              onClick={() => setIsMapExpanded(false)}
+              aria-label="Close"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+            <div style={{ flex: 1, padding: "1.5rem 2rem", overflow: "hidden", position: "relative" }}>
+              <MapView
+                events={mapDisplayEvents}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                liveWindowMs={liveWindowMs}
+                debugOverlay={debugOverlay}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* <div className="opsTop"> */}
       <div className="opsHeading">
         <div className="opsHeadingContent">
@@ -3016,6 +3042,7 @@ export default function OpsExperience() {
             onSelect={setSelectedId}
             liveWindowMs={liveWindowMs}
             debugOverlay={debugOverlay}
+            onExpand={() => setIsMapExpanded(true)}
           />
         </article>
 
