@@ -85,7 +85,7 @@ export default function EventDetail({
               border: "none",
               outline: "none",
               resize: "vertical",
-              minHeight: "4em",
+              minHeight: "2.8em",
               padding: "0",
               fontFamily: "inherit",
               fontSize: "0.82rem",

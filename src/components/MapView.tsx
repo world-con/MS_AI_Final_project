@@ -90,8 +90,10 @@ export default function MapView({
         style={{
           position: "relative",
           width: "100%",
+          maxWidth: "95%",
+          margin: "0 auto",
           aspectRatio: `${mapAspect}`,
-          borderRadius: "14px 14px 0 0",
+          borderRadius: "14px",
           overflow: "hidden",
           border: "1px solid rgba(120,150,210,0.18)",
           background: "rgba(0,0,0,0.12)",
@@ -104,7 +106,7 @@ export default function MapView({
               alt="floorplan"
               fill
               style={{
-                objectFit: mapAspectRatioOverride ? "fill" : "cover",
+                objectFit: "contain",
                 opacity: 0.97,
               }}
               priority

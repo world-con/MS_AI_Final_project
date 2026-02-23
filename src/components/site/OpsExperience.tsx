@@ -2745,7 +2745,7 @@ export default function OpsExperience() {
           </div>
           <div className="opsSignalBody">
             <p>
-              인원 <strong>{signalChecks.crowd.count}</strong>명 · 혼잡도{" "}
+              인원 <strong>{signalChecks.crowd.count}</strong> 명 · 혼잡도{" "}
               <strong>{signalChecks.crowd.congestionLevel}</strong>
             </p>
             <p>
@@ -2813,7 +2813,6 @@ export default function OpsExperience() {
           <div className="opsSignalBody">
             <p>
               심각도 <strong>{signalChecks.trash.severity}</strong>
-              <strong>{signalChecks.trash.trashCount}</strong>건
             </p>
             <p>
               감지 <strong>{signalChecks.trash.count}</strong>건 · 구역{" "}
