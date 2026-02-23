@@ -2422,16 +2422,7 @@ export default function OpsExperience() {
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
             </button>
-            <div style={{
-              flex: 1,
-              padding: "1.5rem 2rem",
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: 0 // Prevent flex child from overflowing
-            }}>
+            <div style={{ flex: 1, padding: "1.5rem 2rem", position: "relative", overflow: "hidden" }}>
               <MapView
                 events={mapDisplayEvents}
                 selectedId={selectedId}

@@ -112,15 +112,17 @@ export default function MapView({
       >
         {viewMode === "2d" ? (
           <>
-            <Image
+            <img
               src={mapImageSrc2d}
               alt="floorplan"
-              fill
               style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
                 objectFit: "contain",
                 opacity: 0.97,
               }}
-              priority
             />
 
             <svg
@@ -254,7 +256,7 @@ export default function MapView({
               })}
             </svg>
           </>
-        ) : (
+        ) : viewMode === "3d" ? (
           <MapWorld3D
             events={events}
             selectedId={selectedId}
@@ -267,7 +269,7 @@ export default function MapView({
             resourceSource="downloads"
             modelSource="downloads"
           />
-        )}
+        ) : null}
 
         <div style={{ position: "absolute", right: 10, top: 10, display: "flex", gap: 6 }}>
           <button
