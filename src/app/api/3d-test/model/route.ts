@@ -1,6 +1,7 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { apiError, noStoreHeaders, resolveRequestId } from "@/lib/apiResponse";
 
-export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 // Optional: if a GLB is added under public/, this endpoint will serve it.
@@ -16,14 +17,13 @@ export async function GET(request: Request) {
 
   for (const modelPath of CANDIDATE_MODEL_PATHS) {
     try {
-      const modelUrl = new URL(modelPath, request.url);
-      const assetResponse = await fetch(modelUrl.toString(), { cache: "no-store" });
-      if (!assetResponse.ok) continue;
-      const buffer = await assetResponse.arrayBuffer();
-      return new Response(buffer, {
+      const fullPath = join(process.cwd(), "public", modelPath);
+      const buffer = await readFile(fullPath);
+
+      return new Response(new Uint8Array(buffer), {
         status: 200,
         headers: noStoreHeaders(requestId, {
-          "content-type": assetResponse.headers.get("content-type") || "model/gltf-binary",
+          "content-type": "model/gltf-binary",
         }),
       });
     } catch {

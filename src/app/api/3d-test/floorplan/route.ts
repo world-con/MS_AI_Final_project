@@ -1,6 +1,7 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { apiError, noStoreHeaders, resolveRequestId } from "@/lib/apiResponse";
 
-export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 const CANDIDATE_FLOORPLAN_PATHS = [
@@ -16,15 +17,13 @@ export async function GET(request: Request) {
 
   for (const assetPath of CANDIDATE_FLOORPLAN_PATHS) {
     try {
-      const fileUrl = new URL(assetPath, request.url);
-      const assetResponse = await fetch(fileUrl.toString(), { cache: "no-store" });
-      if (!assetResponse.ok) continue;
+      const fullPath = join(process.cwd(), "public", assetPath);
+      const buffer = await readFile(fullPath);
 
-      const buffer = await assetResponse.arrayBuffer();
-      return new Response(buffer, {
+      return new Response(new Uint8Array(buffer), {
         status: 200,
         headers: noStoreHeaders(requestId, {
-          "content-type": assetResponse.headers.get("content-type") || "image/png",
+          "content-type": assetPath.endsWith(".png") ? "image/png" : "image/jpeg",
         }),
       });
     } catch {

@@ -1,7 +1,8 @@
+import { stat } from "node:fs/promises";
+import { join } from "node:path";
 import zoneMap from "@/data/zone_map_s001.json";
 import { apiJson, resolveRequestId } from "@/lib/apiResponse";
 
-export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 const FLOORPLAN_CANDIDATES = [
@@ -19,12 +20,11 @@ const MODEL_CANDIDATES = [
   "/store.glb",
 ];
 
-async function probeAsset(request: Request, candidates: readonly string[]) {
+async function probeAsset(candidates: readonly string[]) {
   for (const path of candidates) {
     try {
-      const assetUrl = new URL(path, request.url);
-      const response = await fetch(assetUrl.toString(), { cache: "no-store" });
-      if (!response.ok) continue;
+      const fullPath = join(process.cwd(), "public", path);
+      await stat(fullPath);
       return {
         exists: true,
         path,
@@ -42,17 +42,17 @@ async function probeAsset(request: Request, candidates: readonly string[]) {
 
 export async function GET(request: Request) {
   const requestId = resolveRequestId(request);
-  const map = zoneMap?.map ?? {};
+  const map = (zoneMap as any)?.map ?? {};
   const world = map?.world ?? {};
-  const floorplanAsset = await probeAsset(request, FLOORPLAN_CANDIDATES);
-  const modelAsset = await probeAsset(request, MODEL_CANDIDATES);
+  const floorplanAsset = await probeAsset(FLOORPLAN_CANDIDATES);
+  const modelAsset = await probeAsset(MODEL_CANDIDATES);
   const floorplanName = floorplanAsset.path.split("/").filter(Boolean).at(-1) ?? "floorplan_wireframe_20241027.png";
   const modelName = modelAsset.path.split("/").filter(Boolean).at(-1) ?? "store_13x13.glb";
 
   return apiJson(
     {
       request_id: requestId,
-      dir: "edge-runtime",
+      dir: "node-runtime",
       zone_map: {
         exists: true,
         world: {
