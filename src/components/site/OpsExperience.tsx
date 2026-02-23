@@ -52,6 +52,7 @@ const FRONT_SIGNALR_TARGETS = [
 ] as const;
 
 const STORAGE_KEY = "twincity-ops-experience-v3";
+const DIAGNOSTICS_API_URL = "https://function-node-realjuhyun-beb6b5eughagdjaz.koreacentral-01.azurewebsites.net/api/getEvents";
 const TIMELINE_MAX = 240;
 const MAX_VISIBLE = 140;
 const OPERATOR_ID = "ops-01";
@@ -1250,6 +1251,10 @@ export default function OpsExperience() {
   const [showSafetyOnMap, setShowSafetyOnMap] = useState(false);
   const [edgeCleaningMarkers, setEdgeCleaningMarkers] = useState<EventItem[]>([]);
   const [edgeSafetyMarkers, setEdgeSafetyMarkers] = useState<EventItem[]>([]);
+
+  // --- Cosmos DB 진단 패널 state ---
+  const [diagEvents, setDiagEvents] = useState<Record<string, unknown>[]>([]);
+  const [diagLoading, setDiagLoading] = useState(false);
   const [manualCameraId, setManualCameraId] = useState(
     DEFAULT_MANUAL_CAMERA_ID,
   );
@@ -1366,6 +1371,17 @@ export default function OpsExperience() {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, [hydrated]);
+
+  // --- 진단 패널 토글 시 Cosmos DB에서 이벤트 조회 ---
+  useEffect(() => {
+    if (!showDiagnostics) return;
+    setDiagLoading(true);
+    fetch(`${DIAGNOSTICS_API_URL}?limit=10`)
+      .then((res) => res.json())
+      .then((data) => setDiagEvents(data.records ?? []))
+      .catch(() => setDiagEvents([]))
+      .finally(() => setDiagLoading(false));
+  }, [showDiagnostics]);
 
   useEffect(() => {
     if (!toast) return;
@@ -2386,13 +2402,19 @@ export default function OpsExperience() {
     <section className="opsShell reveal delay-1">
       {/* <div className="opsTop"> */}
       <div className="opsHeading">
-        {hasOpsKicker ? (
-          <p className="kicker">
-            {meta.icon} {meta.opsKicker}
-          </p>
-        ) : null}
-        {hasOpsTitle ? <h2>{meta.opsTitle}</h2> : null}
-        <p>{meta.opsLead}</p>
+        <div className="opsHeadingContent">
+          {hasOpsKicker ? (
+            <p className="kicker">
+              {meta.icon} {meta.opsKicker}
+            </p>
+          ) : null}
+          {hasOpsTitle ? <h2>{meta.opsTitle}</h2> : null}
+          <p>{meta.opsLead}</p>
+        </div>
+        <div className="opsClock">
+          <span className="opsClockTime mono"><small>현재 시간</small>{new Date(now).toLocaleTimeString("ko-KR", { hour12: false, hour: "2-digit", minute: "2-digit" })}</span>
+          <span className="opsClockDate">{new Date(now).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "long" })}</span>
+        </div>
       </div>
 
       {/* <div className="opsMetricRow"> */}
@@ -2791,7 +2813,7 @@ export default function OpsExperience() {
           <div className="opsSignalBody">
             <p>
               심각도 <strong>{signalChecks.trash.severity}</strong>
-              {/* <strong>{signalChecks.trash.trashCount}</strong>건 */}
+              <strong>{signalChecks.trash.trashCount}</strong>건
             </p>
             <p>
               감지 <strong>{signalChecks.trash.count}</strong>건 · 구역{" "}
@@ -2899,37 +2921,45 @@ export default function OpsExperience() {
 
           <div className="opsDiagLog">
             <div className="opsDiagLogHead">
-              <strong>최근 이벤트 내역</strong>
-              <span className="mono">최근 10건</span>
+              <strong>최근 이벤트 내역 (Cosmos DB)</strong>
+              <span className="mono">{diagLoading ? "불러오는 중..." : `${diagEvents.length}건`}</span>
             </div>
-            {recentEvents.length === 0 ? (
+            {diagLoading ? (
               <div className="opsDiagLogEmpty">
-                아직 기록된 이벤트가 없습니다.
+                Cosmos DB에서 데이터를 불러오는 중...
+              </div>
+            ) : diagEvents.length === 0 ? (
+              <div className="opsDiagLogEmpty">
+                기록된 이벤트가 없습니다.
               </div>
             ) : (
               <div className="opsDiagLogList">
-                {recentEvents.map((event) => {
-                  const at = new Date(event.detected_at).toLocaleTimeString(
-                    undefined,
-                    {
+                {diagEvents.map((record, idx) => {
+                  const ts = record.timestamp ?? record.detected_at ?? record._ts;
+                  const at = ts
+                    ? new Date(
+                      typeof ts === "number" && ts < 1e12 ? ts * 1000 : Number(ts),
+                    ).toLocaleTimeString(undefined, {
                       hour: "2-digit",
                       minute: "2-digit",
                       second: "2-digit",
-                    },
-                  );
-                  const typeName = getEventTypeLabel(event.type);
+                    })
+                    : "-";
+                  const eventType = String(record.eventType ?? record.type ?? "-");
+                  const deviceId = String(record.deviceId ?? record.camera_id ?? "-");
+                  const severity = record.severity ?? "-";
                   return (
-                    <div key={event.id} className="opsDiagLogRow">
+                    <div key={String(record.id ?? idx)} className="opsDiagLogRow">
                       <span className="mono">{at}</span>
                       <span
-                        className={`opsDiagLogBadge severityBadge sev-${event.severity}`}
+                        className="opsDiagLogBadge"
                         style={{ minWidth: "70px" }}
                       >
-                        {typeName}
+                        {eventType}
                       </span>
-                      <span>{getZoneLabel(event.zone_id)}</span>
+                      <span>{deviceId}</span>
                       <span className="mono" style={{ fontSize: "0.74rem", textAlign: "right" }}>
-                        S{event.severity}
+                        S{String(severity)}
                       </span>
                     </div>
                   );
@@ -2987,7 +3017,6 @@ export default function OpsExperience() {
             onSelect={setSelectedId}
             liveWindowMs={liveWindowMs}
             debugOverlay={debugOverlay}
-            mapAspectRatioOverride={16 / 9} // 이 줄을 추가
           />
         </article>
 

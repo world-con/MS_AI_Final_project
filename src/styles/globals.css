@@ -1863,13 +1863,61 @@ body.is-gated {
 }
 
 .opsHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+  margin-bottom: 1.2rem;
+}
+
+.opsHeadingContent {
   display: grid;
   gap: 0.55rem;
 }
 
+.opsClock {
+  text-align: center;
+  padding: 1.2rem 1.6rem;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1.2rem;
+  box-shadow: var(--shadow-sm);
+  margin-right: 1rem;
+  margin-bottom: 0;
+}
+
+.opsClockTime {
+  display: block;
+  font-size: clamp(1.8rem, 5vw, 3.2rem);
+  font-weight: 800;
+  color: #000;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-family: "Avenir Next", "Satoshi", "Inter", sans-serif;
+}
+
+.opsClockTime small {
+  font-size: var(--type-sm);
+  font-weight: 400;
+  color: var(--ink-muted);
+  margin-right: 0.6rem;
+  vertical-align: baseline;
+  font-family: "Avenir Next", "Satoshi", "Noto Sans KR", "Segoe UI", "sans-serif";
+}
+
+.opsClockDate {
+  display: block;
+  font-size: var(--type-sm);
+  color: var(--ink-muted);
+  margin-top: 0.1rem;
+}
+
 .opsHeading h2 {
-  font-family: var(--font-display-stack);
-  font-size: clamp(1.4rem, 2.1vw, 2rem);
+  font-family: "Avenir Next", "Satoshi", "Noto Sans KR", "Segoe UI", sans-serif;
+  /* font-family: var(--font-display-stack); */
+  /* font-size: clamp(1.4rem, 2.1vw, 2rem); */
+  font-size: 2rem;
   line-height: 1.12;
 }
 
@@ -2111,7 +2159,7 @@ body.is-gated {
   border-radius: var(--radius-sm);
   background:
     radial-gradient(120% 120% at 100% 0%, rgba(47, 111, 104, 0.05), transparent 42%),
-    rgba(225, 225, 225, 0.66);
+    rgba(255, 255, 255, 0.7);
   /* rgba(255, 255, 255, 0.66);
      */
 
@@ -2465,7 +2513,7 @@ body.is-gated {
   display: grid;
   gap: 0.62rem;
   min-height: 0;
-  height: 90%;
+  height: 100%;
   box-shadow: 0 16px 30px rgba(28, 24, 17, 0.09);
   backdrop-filter: blur(3px);
   transition: border-color 160ms ease, box-shadow 180ms ease;
