@@ -2821,13 +2821,13 @@ export default function OpsExperience() {
           </div>
           <div className="opsSignalBody">
             <p>
-              심각도 <strong>{signalChecks.safety.severity}</strong> · 낙상{" "}
+              심각도 <strong>{signalChecks.safety.severity}</strong> · 감지{" "}
               <strong>{signalChecks.safety.fallCount}</strong>건
             </p>
-            <p>
+            {/* <p>
               요약 <strong>{signalChecks.safety.summary}</strong> · 조치{" "}
               <strong>{signalChecks.safety.action}</strong>
-            </p>
+            </p> */}
             <p>
               구역 <strong>{signalChecks.safety.zoneId}</strong> · 갱신{" "}
               <strong>
@@ -2891,12 +2891,14 @@ export default function OpsExperience() {
               전체 알림 <strong>{events.length}</strong>건
             </p>
             <p>
-              최근 기록{" "}
-              <strong>
-                {recentActions[0]
-                  ? getEventIdLabel(recentActions[0].event_id)
-                  : "-"}
-              </strong>
+              최근{" "}
+              {diagEvents[0] ? (
+                <span className="opsDiagLogBadge" style={{ minWidth: "70px" }}>
+                  {String(diagEvents[0].eventType ?? diagEvents[0].type ?? "-")}
+                </span>
+              ) : (
+                <strong>-</strong>
+              )}
             </p>
             <p>
               패널 상태 <strong>{showDiagnostics ? "표시 중" : "숨김"}</strong>
@@ -2936,7 +2938,7 @@ export default function OpsExperience() {
               표시 {visibleEvents.length}건 · 라이브 비율 {liveRatio}
             </span>
           </div>
-          <div className="opsDiagnosticsGrid">
+          {/* <div className="opsDiagnosticsGrid">
             <article className="opsDiagItem">
               <span>선택 객체</span>
               <strong className="mono">{selectedSummary}</strong>
@@ -2960,7 +2962,7 @@ export default function OpsExperience() {
                 {openCount} / {criticalCount}
               </strong>
             </article>
-          </div>
+          </div> */}
 
           <div className="opsDiagLog">
             <div className="opsDiagLogHead">
