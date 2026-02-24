@@ -2934,9 +2934,9 @@ export default function OpsExperience() {
         <div className="opsDiagnostics">
           <div className="opsDiagnosticsHead">
             <strong>운영 진단 패널</strong>
-            <span className="mono">
+            {/* <span className="mono">
               표시 {visibleEvents.length}건 · 라이브 비율 {liveRatio}
-            </span>
+            </span> */}
           </div>
           {/* <div className="opsDiagnosticsGrid">
             <article className="opsDiagItem">
