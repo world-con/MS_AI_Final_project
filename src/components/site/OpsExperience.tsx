@@ -2888,7 +2888,7 @@ export default function OpsExperience() {
           </div>
           <div className="opsSignalBody">
             <p>
-              전체 알림 <strong>{events.length}</strong>건
+              전체 알림 <strong>{diagEvents.length}</strong>건
             </p>
             <p>
               최근{" "}
@@ -2980,16 +2980,20 @@ export default function OpsExperience() {
             ) : (
               <div className="opsDiagLogList">
                 {diagEvents.map((record, idx) => {
-                  const ts = record.timestamp ?? record.detected_at ?? record._ts;
-                  const at = ts
-                    ? new Date(
-                      typeof ts === "number" && ts < 1e12 ? ts * 1000 : Number(ts),
-                    ).toLocaleTimeString(undefined, {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
-                    })
-                    : "-";
+                  const tsRaw = record.timestamp ?? record.detected_at ?? record._ts;
+                  const at = (() => {
+                    if (tsRaw === null || tsRaw === undefined) return "-";
+                    const tsStr = String(tsRaw);
+                    const n = Number(tsRaw);
+                    const d = isNaN(n) ? new Date(tsStr) : new Date(n < 1e12 ? n * 1000 : n);
+                    return isNaN(d.getTime())
+                      ? tsStr
+                      : d.toLocaleTimeString(undefined, {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                      });
+                  })();
                   const eventType = String(record.eventType ?? record.type ?? "-");
                   const deviceId = String(record.deviceId ?? record.camera_id ?? "-");
                   const severity = record.severity ?? "-";
@@ -3004,7 +3008,7 @@ export default function OpsExperience() {
                       </span>
                       <span>{deviceId}</span>
                       <span className="mono" style={{ fontSize: "0.74rem", textAlign: "right" }}>
-                        S{String(severity)}
+                        {String(severity)}
                       </span>
                     </div>
                   );
