@@ -1,11 +1,11 @@
 import type { EventType, EventTypeFilter, IncidentStatus } from "@/lib/types";
 
 const EVENT_TYPE_LABELS: Record<EventType, string> = {
-  crowd: "사람 몰림",
-  fall: "넘어짐",
+  crowd: "혼잡도",
+  fall: "이상행동",
   fight: "다툼",
   loitering: "오래 머묾",
-  unknown: "알 수 없음",
+  unknown: "쓰레기 발생",
 };
 
 const INCIDENT_STATUS_LABELS: Record<IncidentStatus, string> = {

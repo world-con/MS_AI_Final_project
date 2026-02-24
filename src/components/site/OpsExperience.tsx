@@ -449,7 +449,7 @@ function buildPhotoSeedEvents(now: number) {
  */
 function parseEdgeWorldMarkers(
   payload: unknown,
-  category: "cleaning" | "safety",
+  category: "cleaning" | "safety" | "crowd",
 ): EventItem[] {
   const markers: EventItem[] = [];
   const now = Date.now();
@@ -497,8 +497,8 @@ function parseEdgeWorldMarkers(
       detected_at: now,
       ingested_at: now,
       latency_ms: 0,
-      type: category === "safety" ? "fall" : "unknown",
-      severity: category === "safety" ? 3 : 2,
+      type: category === "safety" ? "fall" : category === "crowd" ? "crowd" : "unknown",
+      severity: category === "safety" ? 3 : category === "crowd" ? 1 : 2,
       confidence: Number(obj.confidence ?? 0.9),
       zone_id: String((location?.zone_id ?? obj.zone_id) ?? "Store"),
       camera_id: String(obj.camera_id ?? obj.deviceId ?? "camera-edge-01"),
@@ -509,10 +509,12 @@ function parseEdgeWorldMarkers(
       y: norm.y,
       world_x_m: worldX,
       world_z_m: worldZ,
-      edge_category: category,
+      // edge_category: category,
       note: category === "cleaning"
         ? `쓰레기 감지 · w(${worldX.toFixed(2)}, ${worldZ.toFixed(2)})`
-        : `이상행동 감지 · w(${worldX.toFixed(2)}, ${worldZ.toFixed(2)})`,
+        : category === "safety"
+          ? `이상행동 감지 · w(${worldX.toFixed(2)}, ${worldZ.toFixed(2)})`
+          : `혼잡도 감지 · w(${worldX.toFixed(2)}, ${worldZ.toFixed(2)})`,
     });
   });
 
@@ -1247,8 +1249,10 @@ export default function OpsExperience() {
   const [manualCoordY, setManualCoordY] = useState("");
 
   // --- 엣지 맵 마커 토글 state ---
-  const [showTrashOnMap, setShowTrashOnMap] = useState(false);
-  const [showSafetyOnMap, setShowSafetyOnMap] = useState(false);
+  const [showCrowdOnMap, setShowCrowdOnMap] = useState(true);
+  const [showTrashOnMap, setShowTrashOnMap] = useState(true);
+  const [showSafetyOnMap, setShowSafetyOnMap] = useState(true);
+  const [edgeCrowdMarkers, setEdgeCrowdMarkers] = useState<EventItem[]>([]);
   const [edgeCleaningMarkers, setEdgeCleaningMarkers] = useState<EventItem[]>([]);
   const [edgeSafetyMarkers, setEdgeSafetyMarkers] = useState<EventItem[]>([]);
 
@@ -1698,15 +1702,18 @@ export default function OpsExperience() {
             console.log("args:", args.map(safePreview));
             console.groupEnd();
 
-            // --- 엣지 데이터(쓰레기/이상행동) 좌표 파싱 ---
-            if (target === "cleaningEvent" || target === "safetyEvent") {
+            // --- 엣지 데이터(혼잡도/쓰레기/이상행동) 좌표 파싱 ---
+            if (target === "cleaningEvent" || target === "safetyEvent" || target === "crowdEvent") {
               const rawPayload = args.length === 1 ? args[0] : args;
-              const edgeMarkers = parseEdgeWorldMarkers(rawPayload, target === "cleaningEvent" ? "cleaning" : "safety");
+              const category = target === "cleaningEvent" ? "cleaning" : target === "safetyEvent" ? "safety" : "crowd";
+              const edgeMarkers = parseEdgeWorldMarkers(rawPayload, category);
               if (edgeMarkers.length > 0) {
                 if (target === "cleaningEvent") {
                   setEdgeCleaningMarkers(edgeMarkers);
-                } else {
+                } else if (target === "safetyEvent") {
                   setEdgeSafetyMarkers(edgeMarkers);
+                } else {
+                  setEdgeCrowdMarkers(edgeMarkers);
                 }
               }
             }
@@ -1852,24 +1859,31 @@ export default function OpsExperience() {
   const mapDisplayEvents = useMemo(() => {
     // const base = [...visibleEvents]; // --- 원본: 모든 이벤트를 맵에 자동 표시 ---
     const base: EventItem[] = [];
+    if (showCrowdOnMap) base.push(...edgeCrowdMarkers);
     if (showTrashOnMap) base.push(...edgeCleaningMarkers);
     if (showSafetyOnMap) base.push(...edgeSafetyMarkers);
     return base;
-  }, [showTrashOnMap, showSafetyOnMap, edgeCleaningMarkers, edgeSafetyMarkers]);
+  }, [showCrowdOnMap, showTrashOnMap, showSafetyOnMap, edgeCrowdMarkers, edgeCleaningMarkers, edgeSafetyMarkers]);
 
   useEffect(() => {
+    if (!selectedId) return;
+    // edge 마커(mapDisplayEvents)에 속한 id는 visibleEvents에 없어도 리셋하지 않음
+    const inMapDisplay = mapDisplayEvents.some((e) => e.id === selectedId);
+    if (inMapDisplay) return;
     if (visibleEvents.length === 0) {
       setSelectedId(undefined);
       return;
     }
-    if (selectedId && !visibleEvents.some((event) => event.id === selectedId)) {
+    if (!visibleEvents.some((event) => event.id === selectedId)) {
       setSelectedId(visibleEvents[0].id);
     }
-  }, [selectedId, visibleEvents]);
+  }, [selectedId, visibleEvents, mapDisplayEvents]);
 
   const selectedEvent = useMemo(
-    () => visibleEvents.find((event) => event.id === selectedId),
-    [selectedId, visibleEvents],
+    () =>
+      visibleEvents.find((event) => event.id === selectedId) ??
+      mapDisplayEvents.find((event) => event.id === selectedId),
+    [selectedId, visibleEvents, mapDisplayEvents],
   );
 
   const selectedTimeline = useMemo(
@@ -2059,7 +2073,7 @@ export default function OpsExperience() {
       to_status: toStatus,
       note: "현장 인력을 호출했습니다.",
     });
-    setToast("직원 호출을 기록했습니다.");
+    setToast("로봇 호출을 기록했습니다.");
 
     if (toStatus === "ack") {
       setEvents((prev) =>
@@ -2773,10 +2787,7 @@ export default function OpsExperience() {
         <span className={`feedDot ${connection}`} aria-hidden />
         <strong>{transportLabel(transport)}</strong>
         <span>{connectionNote}</span>
-        <span>마지막 갱신 </span>
-        {/* <span className="mono">마지막 갱신 </span> */}
-
-
+        <span>마지막 갱신 <span className="mono">{lastSyncLabel}</span></span>
       </div>
 
       <section className="opsSignalGrid" aria-label="실시간 3대 상황">
@@ -2799,17 +2810,16 @@ export default function OpsExperience() {
               </strong>
             </p>
           </div>
-          {/* <button
+          <button
             type="button"
-            className="opsSignalFocus"
+            className={"opsSignalFocus" + (showCrowdOnMap ? " active" : "")}
             onClick={() => {
-              setTypeFilter("crowd");
-              setOpenOnly(false);
-              setToast("혼잡도 이벤트 중심으로 지도를 보여줍니다.");
+              setShowCrowdOnMap((prev) => !prev);
+              setToast(showCrowdOnMap ? "혼잡도 마커를 숨겼습니다." : "혼잡도 마커를 지도에 표시합니다.");
             }}
           >
-            지도에서 혼잡도 보기
-          </button> */}
+            {showCrowdOnMap ? "혼잡도 숨기기" : "지도에서 혼잡도 보기"}
+          </button>
         </article>
 
         <article className="opsSignalCard">
@@ -2934,9 +2944,6 @@ export default function OpsExperience() {
         <div className="opsDiagnostics">
           <div className="opsDiagnosticsHead">
             <strong>운영 진단 패널</strong>
-            {/* <span className="mono">
-              표시 {visibleEvents.length}건 · 라이브 비율 {liveRatio}
-            </span> */}
           </div>
           {/* <div className="opsDiagnosticsGrid">
             <article className="opsDiagItem">
