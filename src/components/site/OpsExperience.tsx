@@ -1195,7 +1195,7 @@ function transportLabel(transport: FeedTransport) {
   if (transport === "ws") return "실시간 연결(웹소켓)";
   if (transport === "sse") return "실시간 연결(스트림)";
   if (transport === "poll") return "주기 조회";
-  if (transport === "signalr") return "실시간 연결(SignalR)";
+  if (transport === "signalr") return "실시간 연결";
   if (transport === "demo") return "연습 데이터";
   return "연결 없음";
 }
@@ -1746,7 +1746,7 @@ export default function OpsExperience() {
         await hub.start();
         console.log("[SignalR] started ✅", hub.state);
         if (cancelled) return;
-        markLive("signalr", "signalR실시간 연결됨");
+        markLive("signalr", "실시간 연결");
       } catch (e) {
         console.log("[SignalR] start failed ❌", e);
         const note = e instanceof Error ? e.message : String(e);
@@ -2828,7 +2828,21 @@ export default function OpsExperience() {
         <span className={`feedDot ${connection}`} aria-hidden />
         <strong>{transportLabel(transport)}</strong>
         <span>{connectionNote}</span>
-        <span>마지막 갱신 </span>
+        <span>
+          마지막 갱신{" "}
+          {lastSyncAt ? (
+            <span className="mono">
+              {new Date(lastSyncAt).toLocaleTimeString("ko-KR", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: false,
+              })}
+            </span>
+          ) : (
+            "-"
+          )}
+        </span>
         {/* <span className="mono">마지막 갱신 </span> */}
 
 
