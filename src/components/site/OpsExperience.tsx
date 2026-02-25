@@ -1746,7 +1746,7 @@ export default function OpsExperience() {
         await hub.start();
         console.log("[SignalR] started ✅", hub.state);
         if (cancelled) return;
-        markLive("signalr", "실시간 연결");
+        markLive("signalr", " ");
       } catch (e) {
         console.log("[SignalR] start failed ❌", e);
         const note = e instanceof Error ? e.message : String(e);
