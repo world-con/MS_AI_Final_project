@@ -1857,11 +1857,23 @@ export default function OpsExperience() {
 
   // --- 맵에는 필터링된 이벤트와 토글된 엣지 마커 표시 ---
   const mapDisplayEvents = useMemo(() => {
-    // 엣지 마커가 켜져 있으면 원본 목록에서 해당 타입의 마커는 숨김 (중복 방지)
+    // 원본 이벤트 필터링: 토글이 꺼져있으면 숨기고, 켜져있으면 엣지 마커가 있을 때만 중복 제거
     const filteredVisible = visibleEvents.filter((ev) => {
-      if (showCrowdOnMap && ev.type === "crowd") return false;
-      if (showTrashOnMap && (ev.edge_category === "cleaning" || ev.type === "unknown")) return false;
-      if (showSafetyOnMap && ev.edge_category === "safety") return false;
+      // 1. 혼잡도
+      if (ev.type === "crowd") {
+        if (!showCrowdOnMap) return false; // 토글 꺼져있으면 숨김
+        if (edgeCrowdMarkers.length > 0) return false; // 엣지 마커 있으면 원본 숨김 (중복 방지)
+      }
+      // 2. 쓰레기 (unknown 타입 포함)
+      if (ev.edge_category === "cleaning" || ev.type === "unknown") {
+        if (!showTrashOnMap) return false;
+        if (edgeCleaningMarkers.length > 0) return false;
+      }
+      // 3. 이상행동 (fall, fight 등 포함)
+      if (ev.edge_category === "safety" || ev.type === "fall" || ev.type === "fight") {
+        if (!showSafetyOnMap) return false;
+        if (edgeSafetyMarkers.length > 0) return false;
+      }
       return true;
     });
 
@@ -2108,7 +2120,7 @@ export default function OpsExperience() {
       to_status: toStatus,
       note: "현장 인력을 호출했습니다.",
     });
-    setToast("직원 호출을 기록했습니다.");
+    setToast("로봇 호출을 기록했습니다.");
 
     if (toStatus === "ack") {
       setEvents((prev) =>
