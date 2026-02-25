@@ -1,12 +1,12 @@
 "use client";
 
-
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import zoneMap from "@/data/zone_map_s001.json";
 import MapWorld3D from "@/components/MapWorld3D";
 import { MODEL_REF_DEPTH_M, MODEL_REF_WIDTH_M } from "@/lib/coordinateTransform";
 import { clamp01, isLive } from "@/lib/geo";
-import { getZoneLabel } from "@/lib/labels";
+import { getEventTypeLabel, getTrackLabel, getZoneLabel } from "@/lib/labels";
 import type { EventItem, ZoneMap } from "@/lib/types";
 
 type Props = {
@@ -134,10 +134,9 @@ export default function MapView({
                 height: "100%",
                 cursor: onExpand ? "zoom-in" : "default"
               }}
-              onClick={(e) => {
-                // 마커 클릭은 stopPropagation으로 차단되므로
-                // 여기는 배경 클릭만 도달함 → 선택 해제만 수행
+              onClick={() => {
                 onSelect(undefined);
+                onExpand?.();
               }}
             >
               {debugOverlay &&
@@ -173,14 +172,10 @@ export default function MapView({
                 const live = isLive(event.detected_at, liveWindowMs);
                 const isAlert = event.raw_status?.toLowerCase() === "fall_down" || event.type === "fall";
                 const isPhotoLog = event.id.startsWith("photo-log-");
-                // const isEdgeCleaning = event.edge_category === "cleaning";
-                // const isEdgeSafety = event.edge_category === "safety";
-                // const isEdgeCrowd = event.edge_category === "crowd";
-                // const isEdgeMarker = isEdgeCleaning || isEdgeSafety || isEdgeCrowd;
-                // const radius = isEdgeSafety ? 11 : isEdgeCleaning ? 9 : isEdgeCrowd ? 9 : isAlert ? 11 : event.severity === 2 ? 8 : 7;
-                const isEdgeCleaning = event.note?.includes("쓰레기") ?? false;
-                const isEdgeSafety = event.type === "fall";
-                const isEdgeCrowd = event.type === "crowd";
+                const isEdgeCleaning = event.edge_category === "cleaning";
+                const isEdgeSafety = event.edge_category === "safety";
+                const isEdgeCrowd = event.edge_category === "crowd";
+                const isEdgeMarker = isEdgeCleaning || isEdgeSafety || isEdgeCrowd;
                 const radius = isEdgeSafety ? 11 : isEdgeCleaning ? 9 : isEdgeCrowd ? 9 : isAlert ? 11 : event.severity === 2 ? 8 : 7;
                 const x = clamp01(event.x);
                 const y = clamp01(event.y);
@@ -192,9 +187,9 @@ export default function MapView({
                 // 엣지 마커 색상: 쓰레기=노란색, 이상행동=빨간색, 혼잡도=하늘색
                 const markerFill = isEdgeSafety
                   ? "rgba(255,74,93,0.96)"
-                  : isEdgeCleaning
+                  : isEdgeCleaning || event.type === "unknown"
                     ? "rgba(255,201,87,0.93)"
-                    : isEdgeCrowd
+                    : isEdgeCrowd || event.type === "crowd"
                       ? "rgba(135,206,235,0.95)"
                       : isAlert
                         ? "rgba(255,74,93,0.96)"
@@ -206,9 +201,9 @@ export default function MapView({
 
                 const markerGlow = isEdgeSafety
                   ? "rgba(255,74,93,0.24)"
-                  : isEdgeCleaning
+                  : isEdgeCleaning || event.type === "unknown"
                     ? "rgba(255,201,87,0.22)"
-                    : isEdgeCrowd
+                    : isEdgeCrowd || event.type === "crowd"
                       ? "rgba(135,206,235,0.24)"
                       : isAlert
                         ? "rgba(255,74,93,0.24)"
@@ -328,5 +323,6 @@ export default function MapView({
       {/* <p style={{ opacity: 0.74 }}>지도의 마커를 누르면 선택 정보가 표시됩니다.</p> */}
       {/* )} */}
     </div>
+    // </div>
   );
 }

@@ -489,7 +489,7 @@ function parseEdgeWorldMarkers(
     );
 
     const trackId = String(obj.track_id ?? idx);
-    const markerId = `edge-${category}-${trackId}-${now}`;
+    const markerId = `edge-${category}-${trackId}`;
 
     markers.push({
       id: markerId,
@@ -509,7 +509,7 @@ function parseEdgeWorldMarkers(
       y: norm.y,
       world_x_m: worldX,
       world_z_m: worldZ,
-      // edge_category: category,
+      edge_category: category,
       note: category === "cleaning"
         ? `쓰레기 감지 · w(${worldX.toFixed(2)}, ${worldZ.toFixed(2)})`
         : category === "safety"
@@ -1855,35 +1855,60 @@ export default function OpsExperience() {
     [filteredEvents],
   );
 
-  // --- 맵에는 토글된 엣지 마커만 표시 (signalChecks 패널은 pushIncoming으로 정상 동작) ---
+  // --- 맵에는 필터링된 이벤트와 토글된 엣지 마커 표시 ---
   const mapDisplayEvents = useMemo(() => {
-    // const base = [...visibleEvents]; // --- 원본: 모든 이벤트를 맵에 자동 표시 ---
-    const base: EventItem[] = [];
+    // 엣지 마커가 켜져 있으면 원본 목록에서 해당 타입의 마커는 숨김 (중복 방지)
+    const filteredVisible = visibleEvents.filter((ev) => {
+      if (showCrowdOnMap && ev.type === "crowd") return false;
+      if (showTrashOnMap && (ev.edge_category === "cleaning" || ev.type === "unknown")) return false;
+      if (showSafetyOnMap && ev.edge_category === "safety") return false;
+      return true;
+    });
+
+    const base = [...filteredVisible];
     if (showCrowdOnMap) base.push(...edgeCrowdMarkers);
     if (showTrashOnMap) base.push(...edgeCleaningMarkers);
     if (showSafetyOnMap) base.push(...edgeSafetyMarkers);
     return base;
-  }, [showCrowdOnMap, showTrashOnMap, showSafetyOnMap, edgeCrowdMarkers, edgeCleaningMarkers, edgeSafetyMarkers]);
+  }, [
+    visibleEvents,
+    showCrowdOnMap,
+    showTrashOnMap,
+    showSafetyOnMap,
+    edgeCrowdMarkers,
+    edgeCleaningMarkers,
+    edgeSafetyMarkers,
+  ]);
 
   useEffect(() => {
-    if (!selectedId) return;
-    // edge 마커(mapDisplayEvents)에 속한 id는 visibleEvents에 없어도 리셋하지 않음
-    const inMapDisplay = mapDisplayEvents.some((e) => e.id === selectedId);
-    if (inMapDisplay) return;
     if (visibleEvents.length === 0) {
       setSelectedId(undefined);
       return;
     }
-    if (!visibleEvents.some((event) => event.id === selectedId)) {
-      setSelectedId(visibleEvents[0].id);
+    if (selectedId && !visibleEvents.some((event) => event.id === selectedId)) {
+      // 엣지 마커나 수동 마커는 리스트에 없어도 선택 유지
+      const isSpecial =
+        selectedId.startsWith("edge-") ||
+        selectedId.startsWith(MANUAL_MAP_EVENT_PREFIX) ||
+        selectedId.startsWith(PHOTO_SEED_EVENT_PREFIX);
+
+      if (!isSpecial) {
+        setSelectedId(visibleEvents[0].id);
+      }
     }
-  }, [selectedId, visibleEvents, mapDisplayEvents]);
+  }, [selectedId, visibleEvents]);
 
   const selectedEvent = useMemo(
-    () =>
-      visibleEvents.find((event) => event.id === selectedId) ??
-      mapDisplayEvents.find((event) => event.id === selectedId),
-    [selectedId, visibleEvents, mapDisplayEvents],
+    () => {
+      const allPossible = [
+        ...visibleEvents,
+        ...edgeCrowdMarkers,
+        ...edgeCleaningMarkers,
+        ...edgeSafetyMarkers,
+      ];
+      return allPossible.find((event) => event.id === selectedId);
+    },
+    [selectedId, visibleEvents, edgeCrowdMarkers, edgeCleaningMarkers, edgeSafetyMarkers],
   );
 
   const selectedTimeline = useMemo(
@@ -1900,6 +1925,13 @@ export default function OpsExperience() {
   const recentEvents = useMemo(
     () => events.slice().reverse().slice(0, 10),
     [events],
+  );
+
+  const handleSelect = useCallback(
+    (id?: string) => {
+      setSelectedId((prev) => (prev === id ? undefined : id));
+    },
+    [],
   );
 
   const moveSelection = useCallback(
@@ -2073,7 +2105,7 @@ export default function OpsExperience() {
       to_status: toStatus,
       note: "현장 인력을 호출했습니다.",
     });
-    setToast("로봇 호출을 기록했습니다.");
+    setToast("직원 호출을 기록했습니다.");
 
     if (toStatus === "ack") {
       setEvents((prev) =>
@@ -2440,7 +2472,7 @@ export default function OpsExperience() {
               <MapView
                 events={mapDisplayEvents}
                 selectedId={selectedId}
-                onSelect={setSelectedId}
+                onSelect={handleSelect}
                 liveWindowMs={liveWindowMs}
                 debugOverlay={debugOverlay}
               />
@@ -2787,7 +2819,10 @@ export default function OpsExperience() {
         <span className={`feedDot ${connection}`} aria-hidden />
         <strong>{transportLabel(transport)}</strong>
         <span>{connectionNote}</span>
-        <span>마지막 갱신 <span className="mono">{lastSyncLabel}</span></span>
+        <span>마지막 갱신 </span>
+        {/* <span className="mono">마지막 갱신 </span> */}
+
+
       </div>
 
       <section className="opsSignalGrid" aria-label="실시간 3대 상황">
@@ -3070,7 +3105,7 @@ export default function OpsExperience() {
           <MapView
             events={mapDisplayEvents}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={handleSelect}
             liveWindowMs={liveWindowMs}
             debugOverlay={debugOverlay}
             onExpand={() => setIsMapExpanded(true)}

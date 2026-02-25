@@ -33,13 +33,7 @@ export default function EventDetail({
   onDispatch?: (event: EventItem) => void;
   onResolve?: (event: EventItem) => void;
 }) {
-  if (!event) {
-    return (
-      <div className="detailEmpty">
-        지도 마커를 선택하면 자세한 내용이 보여요.
-      </div>
-    );
-  }
+  if (!event) return null;
 
   const live = isLive(event.detected_at, liveWindowMs);
   const detected = new Date(event.detected_at).toLocaleString();

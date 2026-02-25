@@ -56,9 +56,10 @@ const DEFAULT_WORLD_DEPTH_M = Number.isFinite(Number(STORE_MAP.map.world?.depth_
 const MARKER_RADIUS_M = 0.12;
 
 function toStatusColor(event: EventItem, live: boolean) {
-  // 엣지 마커: 쓰레기=노란색, 이상행동=빨간색
+  // 엣지 마커 & 혼잡도: 하늘색, 쓰레기: 노란색, 이상행동: 빨간색
   if (event.edge_category === "safety") return 0xff4d4f;
-  if (event.edge_category === "cleaning") return 0xffc857;
+  if (event.edge_category === "cleaning" || event.type === "unknown") return 0xffc857;
+  if (event.edge_category === "crowd" || event.type === "crowd") return 0x87ceeb;
   const raw = event.raw_status?.toLowerCase();
   if (raw === "fall_down" || event.type === "fall" || event.severity === 3) return 0xff4d4f;
   if (!live) return 0x6d82a0;
