@@ -1881,17 +1881,20 @@ export default function OpsExperience() {
   ]);
 
   useEffect(() => {
+    // 엣지 마커나 수동 마커가 선택되어 있으면 리스트가 비어있어도 선택 유지
+    const isSpecial =
+      selectedId?.startsWith("edge-") ||
+      selectedId?.startsWith(MANUAL_MAP_EVENT_PREFIX) ||
+      selectedId?.startsWith(PHOTO_SEED_EVENT_PREFIX);
+
     if (visibleEvents.length === 0) {
-      setSelectedId(undefined);
+      if (!isSpecial) {
+        setSelectedId(undefined);
+      }
       return;
     }
-    if (selectedId && !visibleEvents.some((event) => event.id === selectedId)) {
-      // 엣지 마커나 수동 마커는 리스트에 없어도 선택 유지
-      const isSpecial =
-        selectedId.startsWith("edge-") ||
-        selectedId.startsWith(MANUAL_MAP_EVENT_PREFIX) ||
-        selectedId.startsWith(PHOTO_SEED_EVENT_PREFIX);
 
+    if (selectedId && !visibleEvents.some((event) => event.id === selectedId)) {
       if (!isSpecial) {
         setSelectedId(visibleEvents[0].id);
       }
