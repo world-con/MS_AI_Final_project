@@ -1746,7 +1746,7 @@ export default function OpsExperience() {
         await hub.start();
         console.log("[SignalR] started ✅", hub.state);
         if (cancelled) return;
-        markLive("signalr", "SignalR 실시간 연결됨");
+        markLive("signalr", "signalR실시간 연결됨");
       } catch (e) {
         console.log("[SignalR] start failed ❌", e);
         const note = e instanceof Error ? e.message : String(e);
@@ -2489,7 +2489,13 @@ export default function OpsExperience() {
               {meta.icon} {meta.opsKicker}
             </p>
           ) : null}
-          {hasOpsTitle ? <h2>{meta.opsTitle}</h2> : null}
+          {/* {hasOpsTitle ? <h2>{meta.opsTitle}</h2> : null} */}
+          {hasOpsTitle ? (
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '1.8rem' }}>
+              <img src="/logo.png" alt="Logo" style={{ height: '3.2em', width: 'auto' }} />
+              {meta.opsTitle}
+            </h2>
+          ) : null}
           <p>{meta.opsLead}</p>
         </div>
         <div className="opsClock">
