@@ -14,9 +14,6 @@ export default function NotFound() {
           <Link className="button" href="/">
             상황판으로
           </Link>
-          <Link className="button buttonGhost" href="/brand">
-            서비스 소개
-          </Link>
         </div>
       </section>
     </div>

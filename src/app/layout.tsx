@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import AppShell from "@/components/site/AppShell";
 import { ThemeProvider } from "@/components/site/theme";
-import AnalyticsScripts from "@/components/site/AnalyticsScripts";
 import "../styles/globals.css";
 
 export const metadata: Metadata = {
@@ -17,9 +16,6 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-  other: {
-    "google-adsense-account": "ca-pub-0000000000000000",
-  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -28,7 +24,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <ThemeProvider>
           <AppShell>{children}</AppShell>
-          <AnalyticsScripts />
         </ThemeProvider>
       </body>
     </html>

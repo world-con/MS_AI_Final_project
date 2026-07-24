@@ -7,29 +7,9 @@ import { useTheme } from "@/components/site/theme";
 
 const BRAND_LINKS = [
   {
-    href: "/brand",
-    label: "서비스 소개",
-    note: "한 번에 보는 서비스 가치",
-  },
-  {
-    href: "/explore",
-    label: "매장 보기",
-    note: "구역별 관찰 화면",
-  },
-  {
     href: "/reports",
     label: "리포트",
     note: "SLA와 운영 통계",
-  },
-  {
-    href: "/journal",
-    label: "운영 메모",
-    note: "개선 기록 모음",
-  },
-  {
-    href: "/about",
-    label: "안내",
-    note: "원칙과 문의 정보",
   },
 ] as const;
 
